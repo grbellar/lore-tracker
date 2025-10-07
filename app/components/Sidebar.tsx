@@ -35,8 +35,8 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
       {/* Sidebar */}
       <aside className={`
         fixed lg:sticky top-0 left-0 h-screen
-        w-64 lg:w-20 bg-background
-        flex flex-col items-center py-6 gap-6
+        w-64 lg:w-24 bg-background
+        flex flex-col items-center py-6 px-4 gap-6
         transition-transform duration-300 z-50
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>

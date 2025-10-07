@@ -10,13 +10,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
       {items.map((item, index) => (
         <button
           key={index}
-          className={`
-            px-3 py-1 rounded-md transition-colors
-            ${index === items.length - 1
-              ? 'bg-accent text-white-text'
-              : 'bg-card-on-card text-light-text hover:text-white-text hover:bg-foreground'
-            }
-          `}
+          className="px-3 py-1 rounded-md bg-card-on-card text-accent transition-colors hover:bg-foreground"
         >
           {item.label}
         </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar } from 'lucide-react';
+import DateBadge from './DateBadge';
 
 interface EntityHeaderProps {
   name: string;
@@ -24,19 +24,10 @@ export default function EntityHeader({
       </h1>
 
       <div className="flex flex-wrap items-center gap-4 text-sm text-light-text">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4" />
-          <span>Last Updated: {lastUpdated}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>{momentsCount} Moments</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>{chaptersCount} Chapters</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>{booksCount} Books</span>
-        </div>
+        <DateBadge date={lastUpdated} />
+        <span>{momentsCount} Moments</span>
+        <span>{chaptersCount} Chapters</span>
+        <span>{booksCount} Books</span>
       </div>
     </div>
   );

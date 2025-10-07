@@ -243,19 +243,19 @@ Guided by the wisdom of Obi-Wan and later Yoda, Luke honed his Force abilities a
             </button>
           </div>
 
+          {/* Entity Header */}
+          <EntityHeader
+            name={entityData.name}
+            lastUpdated={entityData.lastUpdated}
+            momentsCount={entityData.momentsCount}
+            chaptersCount={entityData.chaptersCount}
+            booksCount={entityData.booksCount}
+          />
+
           {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             {/* Main Content - Left Side */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Entity Header */}
-              <EntityHeader
-                name={entityData.name}
-                lastUpdated={entityData.lastUpdated}
-                momentsCount={entityData.momentsCount}
-                chaptersCount={entityData.chaptersCount}
-                booksCount={entityData.booksCount}
-              />
-
               {/* Description */}
               <div className="text-light-text leading-relaxed whitespace-pre-line">
                 {entityData.description}

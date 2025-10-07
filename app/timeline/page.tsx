@@ -7,10 +7,12 @@ import Breadcrumb from '../components/Breadcrumb';
 import ArticleHeader from '../components/ArticleHeader';
 import ArticleContent from '../components/ArticleContent';
 import NewEntityModal from '../components/NewEntityModal';
+import EntityCard from '../components/EntityCard';
 
 export default function TimelinePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [entityModalOpen, setEntityModalOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Hard-coded data
   const breadcrumbItems = [
@@ -113,6 +115,50 @@ export default function TimelinePage() {
     }
   ];
 
+  const entityCardData = {
+    type: 'CHARACTER',
+    name: 'Mark Janzen',
+    lastUpdated: 'August 20, 2025',
+    momentCount: 15,
+    description: "Mark Janzen is the real-life CEO of Planetary Talent Inc., based in Wichita, Kansas. In the lore, Mark's discovery of Maxwell's computer at the Living Computer Museum in Seattle and purchased it from the museum when they were considering closing.\n\nDuring the Covid pandemic, when he moved back to Wichita, Mark found the old computer and decided to try to get it working. Little did he know, this would lead to the founding of Planetary Talent. The computer contained files and plans that inspired Mark to realize Maxwell's vision.",
+    books: [
+      {
+        title: 'Book 1: The Beginning',
+        isExpanded: true,
+        chapters: [
+          {
+            title: 'Chapter 1: The First Thing',
+            momentCount: 14,
+            isExpanded: true,
+            moments: [
+              { text: '...Mark gave the machine a solid thump on its side...' },
+              { text: 'As he looked around, Mark wonder' },
+              { text: 'As he t' },
+              { text: '...Mark arranged the meeting...' },
+              { text: '"What is this?" Mark asked.' },
+              { text: 'The door next to him' },
+              { text: '"What is' },
+              { text: 'As Mark took the first step...' },
+              { text: '...and Mark turned toward him...' },
+              { text: '"What\'s the meaning' },
+              { text: '...and M' }
+            ]
+          },
+          {
+            title: 'Chapter 2: The Man in the Goggles',
+            momentCount: 14,
+            isExpanded: false
+          },
+          {
+            title: 'Chapter 3: The Man in the Goggles',
+            momentCount: 17,
+            isExpanded: false
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background text-white-text flex">
       {/* Sidebar */}
@@ -141,16 +187,18 @@ export default function TimelinePage() {
         </div>
 
         {/* Content Container */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto pl-4 sm:pl-6 lg:pl-8 pr-2 py-8">
           {/* Breadcrumb */}
-          <div className="mb-8">
-            <Breadcrumb items={breadcrumbItems} />
-          </div>
+          {!isExpanded && (
+            <div className="mb-8">
+              <Breadcrumb items={breadcrumbItems} />
+            </div>
+          )}
 
           {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className={`grid grid-cols-1 ${isExpanded ? '' : 'lg:grid-cols-3'} gap-8 transition-all duration-300`}>
             {/* Main Content - Left Side */}
-            <div className="lg:col-span-2">
+            <div className={`transition-all duration-300 ${isExpanded ? 'max-w-4xl mx-auto' : 'lg:col-span-2'}`}>
               {/* Article Header */}
               <ArticleHeader
                 title={articleData.title}
@@ -158,6 +206,7 @@ export default function TimelinePage() {
                 characterCount={articleData.characterCount}
                 wordCount={articleData.wordCount}
                 readTime={articleData.readTime}
+                onExpand={() => setIsExpanded(!isExpanded)}
               />
 
               {/* Article Content */}
@@ -165,14 +214,8 @@ export default function TimelinePage() {
             </div>
 
             {/* Sidebar - Right Side */}
-            <div className="space-y-6">
-              {/* Entity Card Placeholder */}
-              <div className="bg-card rounded-lg p-6 border border-card-on-card">
-                <h3 className="text-sm font-semibold text-light-text uppercase tracking-wider mb-4">
-                  Related Entities
-                </h3>
-                <p className="text-sm text-light-text">Entity cards will appear here</p>
-              </div>
+            <div className={`space-y-6 transition-all duration-300 ${isExpanded ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
+              <EntityCard {...entityCardData} />
             </div>
           </div>
         </div>
