@@ -30,7 +30,7 @@ export default function SignIn() {
         router.push("/dashboard")
         router.refresh()
       }
-    } catch (error) {
+    } catch {
       setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
@@ -88,7 +88,7 @@ export default function SignIn() {
           </form>
 
           <div className="mt-6 text-center text-sm text-light-text">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/auth/signup" className="text-accent hover:underline">
               Sign up
             </Link>

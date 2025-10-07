@@ -45,7 +45,6 @@ const typeConfig = {
 };
 
 export default function EntityListCard({
-  id,
   type,
   name,
   description,

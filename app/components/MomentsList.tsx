@@ -18,7 +18,7 @@ interface MomentsListProps {
   onLoadMore?: () => void;
 }
 
-export default function MomentsList({ moments, hasMore = false, onLoadMore }: MomentsListProps) {
+export default function MomentsList({ moments }: MomentsListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(moments[1]?.id || null);
   const [displayedMoments, setDisplayedMoments] = useState<Moment[]>(moments.slice(0, 10));
   const [loading, setLoading] = useState(false);
@@ -27,6 +27,22 @@ export default function MomentsList({ moments, hasMore = false, onLoadMore }: Mo
 
   // Infinite scroll observer
   useEffect(() => {
+    const loadMoreMoments = () => {
+      const currentLength = displayedMoments.length;
+      const hasMoreToLoad = currentLength < moments.length;
+
+      if (hasMoreToLoad && !loading) {
+        setLoading(true);
+
+        // Simulate loading delay for smooth animation
+        setTimeout(() => {
+          const nextMoments = moments.slice(currentLength, currentLength + 5);
+          setDisplayedMoments([...displayedMoments, ...nextMoments]);
+          setLoading(false);
+        }, 300);
+      }
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !loading) {
@@ -41,23 +57,7 @@ export default function MomentsList({ moments, hasMore = false, onLoadMore }: Mo
     }
 
     return () => observer.disconnect();
-  }, [displayedMoments, loading]);
-
-  const loadMoreMoments = () => {
-    const currentLength = displayedMoments.length;
-    const hasMoreToLoad = currentLength < moments.length;
-
-    if (hasMoreToLoad && !loading) {
-      setLoading(true);
-
-      // Simulate loading delay for smooth animation
-      setTimeout(() => {
-        const nextMoments = moments.slice(currentLength, currentLength + 5);
-        setDisplayedMoments([...displayedMoments, ...nextMoments]);
-        setLoading(false);
-      }, 300);
-    }
-  };
+  }, [displayedMoments, loading, moments]);
 
   return (
     <div>
@@ -86,7 +86,7 @@ export default function MomentsList({ moments, hasMore = false, onLoadMore }: Mo
         }}
       >
         <div className="space-y-0">
-          {displayedMoments.map((moment, index) => (
+          {displayedMoments.map((moment) => (
             <div
               key={moment.id}
               onClick={() => setExpandedId(expandedId === moment.id ? null : moment.id)}

@@ -65,7 +65,7 @@ export default function SignUp() {
 
       // Redirect to dashboard on success
       router.push("/dashboard")
-    } catch (error) {
+    } catch {
       setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)

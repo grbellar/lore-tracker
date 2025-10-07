@@ -143,13 +143,37 @@ const mockEntities: Entity[] = [
   }
 ];
 
-const filterOptions = [
-  { value: 'all', label: 'All Entities', icon: Filter },
-  { value: 'character', label: 'Characters', icon: Users },
-  { value: 'location', label: 'Locations', icon: MapPin },
-  { value: 'item', label: 'Items', icon: Package },
-  { value: 'organization', label: 'Organizations', icon: Building2 }
-];
+// Label options for each entity type
+const labelOptions = {
+  character: [
+    { value: 'all', label: 'All Characters' },
+    { value: 'protagonist', label: 'Protagonist' },
+    { value: 'antagonist', label: 'Antagonist' },
+    { value: 'supporting', label: 'Supporting' },
+    { value: 'minor', label: 'Minor' }
+  ],
+  location: [
+    { value: 'all', label: 'All Locations' },
+    { value: 'planet', label: 'Planet' },
+    { value: 'city', label: 'City' },
+    { value: 'building', label: 'Building' },
+    { value: 'landmark', label: 'Landmark' }
+  ],
+  item: [
+    { value: 'all', label: 'All Items' },
+    { value: 'weapon', label: 'Weapon' },
+    { value: 'artifact', label: 'Artifact' },
+    { value: 'vehicle', label: 'Vehicle' },
+    { value: 'technology', label: 'Technology' }
+  ],
+  organization: [
+    { value: 'all', label: 'All Organizations' },
+    { value: 'government', label: 'Government' },
+    { value: 'military', label: 'Military' },
+    { value: 'religious', label: 'Religious' },
+    { value: 'criminal', label: 'Criminal' }
+  ]
+};
 
 export default function EntitiesPage() {
   const router = useRouter();
@@ -159,25 +183,26 @@ export default function EntitiesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [entityModalOpen, setEntityModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filterType, setFilterType] = useState<'all' | EntityType>(typeParam || 'all');
+  const [selectedLabel, setSelectedLabel] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
 
-  // Update filter when URL param changes
-  useMemo(() => {
-    if (typeParam && typeParam !== filterType) {
-      setFilterType(typeParam);
-    }
-  }, [typeParam]);
+  // Get current entity type from URL
+  const currentEntityType = (typeParam || 'all') as 'all' | EntityType;
 
   // Filter entities based on type and search
   const filteredEntities = useMemo(() => {
     let filtered = mockEntities;
 
-    // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter(entity => entity.type === filterType);
+    // Filter by type from URL
+    if (currentEntityType !== 'all') {
+      filtered = filtered.filter(entity => entity.type === currentEntityType);
     }
+
+    // Filter by label (placeholder for now - will be implemented with actual entity labels later)
+    // if (selectedLabel !== 'all') {
+    //   filtered = filtered.filter(entity => entity.labels?.includes(selectedLabel));
+    // }
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -189,40 +214,44 @@ export default function EntitiesPage() {
     }
 
     return filtered;
-  }, [filterType, searchQuery]);
+  }, [currentEntityType, searchQuery]);
 
-  const handleFilterChange = (newFilter: 'all' | EntityType) => {
-    setFilterType(newFilter);
+  const handleLabelChange = (newLabel: string) => {
+    setSelectedLabel(newLabel);
     setFilterDropdownOpen(false);
-
-    // Update URL
-    if (newFilter === 'all') {
-      router.push('/entities');
-    } else {
-      router.push(`/entities?type=${newFilter}`);
-    }
   };
 
   const handleEntityClick = (entity: Entity) => {
     router.push(`/entity?id=${entity.id}&type=${entity.type}`);
   };
 
-  // Get page title and description based on filter
+  // Get page title and description based on entity type
   const getPageTitle = () => {
-    const option = filterOptions.find(opt => opt.value === filterType);
-    return option?.label || 'All Entities';
+    if (currentEntityType === 'all') return 'All Entities';
+    if (currentEntityType === 'character') return 'Characters';
+    if (currentEntityType === 'location') return 'Locations';
+    if (currentEntityType === 'item') return 'Items';
+    if (currentEntityType === 'organization') return 'Organizations';
+    return 'All Entities';
   };
 
   const getPageDescription = () => {
-    if (filterType === 'all') {
+    if (currentEntityType === 'all') {
       return 'Browse and manage all entities in your universe.';
     }
-    const option = filterOptions.find(opt => opt.value === filterType);
-    return `Browse and manage all ${option?.label.toLowerCase()} in your universe.`;
+    return `Browse and manage all ${getPageTitle().toLowerCase()} in your universe.`;
   };
 
-  const currentFilterOption = filterOptions.find(opt => opt.value === filterType);
-  const FilterIcon = currentFilterOption?.icon || Filter;
+  // Get label options for current entity type
+  const getCurrentLabelOptions = () => {
+    if (currentEntityType === 'all') {
+      return [{ value: 'all', label: 'All Entities' }];
+    }
+    return labelOptions[currentEntityType] || [{ value: 'all', label: 'All' }];
+  };
+
+  const currentLabelOptions = getCurrentLabelOptions();
+  const currentLabelOption = currentLabelOptions.find(opt => opt.value === selectedLabel) || currentLabelOptions[0];
 
   return (
     <div className="min-h-screen bg-background text-white-text flex">
@@ -284,14 +313,18 @@ export default function EntitiesPage() {
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              {/* Filter Dropdown */}
+              {/* Label Filter Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
                   className="flex items-center gap-2 px-4 py-2 bg-card border border-card-on-card rounded-lg text-sm text-white-text hover:border-accent transition-colors"
                 >
-                  <FilterIcon className="w-4 h-4" />
-                  <span>{currentFilterOption?.label}</span>
+                  {currentEntityType === 'character' && <Users className="w-4 h-4" />}
+                  {currentEntityType === 'location' && <MapPin className="w-4 h-4" />}
+                  {currentEntityType === 'item' && <Package className="w-4 h-4" />}
+                  {currentEntityType === 'organization' && <Building2 className="w-4 h-4" />}
+                  {currentEntityType === 'all' && <Filter className="w-4 h-4" />}
+                  <span>{currentLabelOption?.label}</span>
                   <ChevronDown className="w-4 h-4 text-light-text" />
                 </button>
 
@@ -303,23 +336,19 @@ export default function EntitiesPage() {
                       onClick={() => setFilterDropdownOpen(false)}
                     />
                     <div className="absolute top-full left-0 mt-2 w-56 bg-card border border-card-on-card rounded-lg shadow-lg z-50 py-2">
-                      {filterOptions.map((option) => {
-                        const OptionIcon = option.icon;
-                        return (
-                          <button
-                            key={option.value}
-                            onClick={() => handleFilterChange(option.value as 'all' | EntityType)}
-                            className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                              filterType === option.value
-                                ? 'bg-accent/20 text-accent'
-                                : 'text-white-text hover:bg-card-on-card'
-                            }`}
-                          >
-                            <OptionIcon className="w-4 h-4" />
-                            <span>{option.label}</span>
-                          </button>
-                        );
-                      })}
+                      {currentLabelOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => handleLabelChange(option.value)}
+                          className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                            selectedLabel === option.value
+                              ? 'bg-accent/20 text-accent'
+                              : 'text-white-text hover:bg-card-on-card'
+                          }`}
+                        >
+                          <span>{option.label}</span>
+                        </button>
+                      ))}
                     </div>
                   </>
                 )}

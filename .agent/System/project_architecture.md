@@ -96,8 +96,18 @@ The application consists of 6 main pages:
 1. **Home (`/`)**: Auto-redirects to `/dashboard`
 2. **Dashboard (`/dashboard`)**: Universe overview with stats, writing progress, quick access, and recent activity
 3. **Write (`/write`)**: Main writing/reading interface with article content and entity sidebar
-4. **Entities (`/entities`)**: Unified entity listing page with grid/list views, filtering by type, and search functionality
-5. **Entity (`/entity`)**: Detailed entity view with description, moments list, custom fields, and relationships
+4. **Entities (`/entities`)**: Unified entity listing page with:
+   - Grid/List view toggle
+   - Filter by entity type via URL params (`?type=character|location|item|organization`)
+   - Label-based sub-filtering (e.g., Protagonist, Antagonist for characters)
+   - Real-time search functionality (filters by name and description)
+   - Type-specific color coding (Character=blue, Location=green, Item=orange, Organization=purple)
+   - Responsive grid (1→2→3→4 columns based on screen size)
+   - Click navigation to entity detail pages
+5. **Entity (`/entity`)**: Detailed entity view with:
+   - URL parameter support (`?id=X&type=Y`)
+   - Back navigation to filtered entity list
+   - Description, moments list, custom fields, and relationships
 6. **Timeline (`/timeline`)**: Timeline view with infinite scrolling moments organized by book/chapter
 
 ### Authentication Pages
@@ -113,8 +123,12 @@ The application consists of 6 main pages:
 
 #### Entity Components
 - **NewEntityModal**: Global modal for entity creation (managed at page level)
-- **EntityCard**: Displays entity info with collapsible book/chapter hierarchy
-- **EntityListCard**: Reusable card component for entity list with grid/list view modes
+- **EntityCard**: Displays entity info with collapsible book/chapter hierarchy (used in sidebar and related contexts)
+- **EntityListCard**: Reusable card component for entity listing page
+  - Supports grid and list view modes
+  - Type-specific badges with color coding
+  - Hover effects with accent border transition
+  - Shows name, description (truncated), moments count, last updated
 - **EntityHeader**: Entity page header with name, stats, and metadata
 - **EntityLink**: Clickable inline entity references in content
 
@@ -133,6 +147,8 @@ The application consists of 6 main pages:
 - **Page-level state**: React `useState` hooks manage local state
 - **Modal state**: Managed at page level, passed down via props
 - **Sidebar state**: Each page manages its own `sidebarOpen` state for mobile responsiveness
+- **View state**: View mode (grid/list), filters, and search managed locally with `useState`
+- **URL state**: Entity type filters sync with URL params using `useSearchParams` and `useRouter`
 - **Session state**: NextAuth `SessionProvider` wraps entire application in root layout
 
 ### Routing & Middleware
@@ -143,6 +159,51 @@ The application consists of 6 main pages:
   - `/auth/signin` (sign-in page)
   - `/auth/signup` (sign-up page)
   - Static assets and favicon
+
+### Entity System & Navigation
+
+#### Unified Entity Model
+All entity types (Characters, Locations, Items, Organizations) share the same underlying structure:
+
+```typescript
+interface Entity {
+  id: string;
+  type: 'character' | 'location' | 'item' | 'organization';
+  name: string;
+  description: string;
+  momentsCount: number;
+  chaptersCount: number;
+  booksCount: number;
+  lastUpdated: string;
+}
+```
+
+#### Entity Label System
+Each entity type has its own set of labels for sub-categorization:
+
+- **Characters**: Protagonist, Antagonist, Supporting, Minor
+- **Locations**: Planet, City, Building, Landmark
+- **Items**: Weapon, Artifact, Vehicle, Technology
+- **Organizations**: Government, Military, Religious, Criminal
+
+*Note: Label filtering UI is implemented but label assignment to entities is pending database integration.*
+
+#### Navigation Flow
+1. **Sidebar** → Click entity type (e.g., "Characters") → `/entities?type=character`
+2. **Entity List** → Click entity card → `/entity?id=X&type=character`
+3. **Entity Detail** → Click back button → `/entities?type=character` (returns to filtered view)
+4. **Entity List** → Change filter dropdown → Updates view without navigation
+5. **Entity List** → Type in search → Real-time filtering of displayed entities
+
+#### Type-Specific Styling
+Each entity type has distinct visual styling for quick identification:
+
+| Type | Icon | Badge Color | Text Color | Border Color |
+|------|------|-------------|------------|--------------|
+| Character | Users | `bg-blue-500/20` | `text-blue-400` | `border-blue-500/30` |
+| Location | MapPin | `bg-green-500/20` | `text-green-400` | `border-green-500/30` |
+| Item | Package | `bg-orange-500/20` | `text-orange-400` | `border-orange-500/30` |
+| Organization | Building2 | `bg-purple-500/20` | `text-purple-400` | `border-purple-500/30` |
 
 ## Design System
 
@@ -239,15 +300,24 @@ NEXTAUTH_URL="http://localhost:3000"
 - Component architecture
 - Responsive layouts
 - Route protection middleware
+- Entity listing page with grid/list views
+- Entity type filtering and navigation
+- Real-time search functionality
+- Type-specific visual styling system
+- Entity detail page with URL parameters
+- Back navigation from entity details
+- Label-based sub-filtering UI (12 entity types with 5 labels each)
 
 ### 🚧 In Progress / TODO
 - Database schema for lore entities (books, chapters, characters, locations, etc.)
 - API routes for CRUD operations
 - Replace mock data with real database queries
-- Entity creation functionality
+- Entity creation functionality (modal UI exists, backend integration needed)
+- Entity label assignment (UI implemented, database integration pending)
 - Timeline data integration
-- Search functionality
+- Advanced search with filters
 - Graph view implementation
+- Rich text editor for writing page
 
 ## Key Technical Decisions
 
@@ -273,11 +343,44 @@ NEXTAUTH_URL="http://localhost:3000"
 - **Modern Features**: Better CSS variable support
 - **Smaller Bundle**: Optimized output
 
+## Mock Data & Development Approach
+
+### Current Mock Data Strategy
+The application currently uses hardcoded mock data across all pages to demonstrate UI/UX functionality:
+
+- **12 Entities** in `app/entities/page.tsx` (3 characters, 3 locations, 3 items, 3 organizations)
+- **20+ Moments** in `app/entity/page.tsx` for timeline demonstration
+- **Dashboard Stats** and activity feeds
+- **Books and Chapters** hierarchy for writing interface
+
+### Mock Data Structure
+Entities use a consistent structure across the application:
+- Unique IDs (string)
+- Type designation (character | location | item | organization)
+- Rich descriptions for demonstration
+- Stat counts (moments, chapters, books)
+- Last updated dates
+
+### Migration Strategy
+When integrating with the database:
+1. Define Prisma schema models matching mock data structure
+2. Create seed script using existing mock data
+3. Replace static imports with API calls
+4. Implement loading states and error handling
+5. Add optimistic UI updates for better UX
+
 ## Notes for Future Development
 
-1. **Database Schema Expansion**: Next step is to design and implement the full lore entity schema
+1. **Database Schema Expansion**: Design and implement the full lore entity schema with relationships
 2. **API Layer**: Create RESTful or tRPC endpoints for entity CRUD operations
-3. **Real-time Features**: Consider WebSockets for collaborative editing
-4. **Search Implementation**: Full-text search for entities and content
-5. **File Uploads**: Image uploads for characters, locations, etc.
-6. **Export Features**: Export universe data to various formats (JSON, PDF, etc.)
+3. **Entity Labels**: Add labels field to entity schema and implement label assignment UI
+4. **Real-time Features**: Consider WebSockets for collaborative editing
+5. **Search Implementation**: Full-text search for entities and content using PostgreSQL
+6. **File Uploads**: Image uploads for characters, locations, etc. (consider Cloudinary/S3)
+7. **Export Features**: Export universe data to various formats (JSON, PDF, etc.)
+8. **Bulk Operations**: Multi-select entities for batch editing or deletion
+
+---
+
+**Last Updated:** 2025-10-07
+**Documentation Version:** 1.1.0

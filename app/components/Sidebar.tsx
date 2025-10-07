@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Workflow, Users, MapPin, Package, Building2, Plus, Network, Settings, User, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import { Home, Workflow, Users, MapPin, Package, Building2, Plus, Network, Settings, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';

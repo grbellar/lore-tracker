@@ -8,6 +8,7 @@ This directory contains comprehensive documentation for the Lore Tracker project
 1. Read [Project Architecture](./System/project_architecture.md) for a complete overview
 2. Review [Database Schema](./System/database_schema.md) to understand data models
 3. Check [Authentication System](./System/authentication_system.md) to understand auth flow
+4. Explore [Text Editor System](./System/text_editor_system.md) to learn about the writing interface
 
 ## Documentation Structure
 
@@ -54,6 +55,22 @@ Core system architecture, technical stack, and infrastructure documentation.
   - Future enhancements (email verification, OAuth, 2FA)
   - Troubleshooting guide
 
+- **[Text Editor System](./System/text_editor_system.md)**
+  - Notion-style WYSIWYG editor built with Tiptap 3.6.5
+  - Component architecture (Editor, SlashMenu, MentionExtension, MentionList)
+  - Slash commands for quick formatting (/, headings, lists, quotes, code blocks)
+  - Entity mentions with @ symbol and autocomplete
+  - Real-time character and word counting
+  - Integration with Write page (/write route)
+  - Design system integration (dark theme, Lexend font, color palette)
+  - Data flow and state management
+  - Content storage formats (HTML and JSON)
+  - Performance considerations and optimization strategies
+  - Security considerations (XSS prevention, input validation)
+  - Future enhancements (AI integration, collaborative editing, version history)
+  - Keyboard shortcuts and navigation
+  - Troubleshooting guide and testing checklist
+
 ### 📁 Tasks Documentation
 
 Product requirements documents (PRDs) and implementation plans for features.
@@ -66,6 +83,26 @@ Product requirements documents (PRDs) and implementation plans for features.
   - bcrypt password hashing
   - Sign up/sign in pages
   - Route protection middleware
+  - Status: ✅ Completed
+
+- **[Entity View Page Implementation](./Tasks/entity_view_page.md)**
+  - Unified entity listing page for all entity types
+  - Grid/list view toggle with responsive layouts
+  - Filter by entity type via URL parameters
+  - Label-based sub-filtering (Protagonist, Planet, Weapon, etc.)
+  - Real-time search functionality
+  - Type-specific color coding and visual styling
+  - Navigation flow with back button support
+  - Status: ✅ Completed
+
+- **[Notion-Style Text Editor](./Tasks/notion_style_editor.md)**
+  - Interactive Notion-style WYSIWYG text editor
+  - Tiptap integration with StarterKit extensions
+  - Slash commands for formatting (headings, lists, quotes, code)
+  - Entity mentions with @ symbol and autocomplete
+  - Real-time character and word counting
+  - Clean, minimal, distraction-free interface
+  - Dark theme integration with Lexend font
   - Status: ✅ Completed
 
 **What belongs here:**
@@ -136,20 +173,32 @@ npm run lint     # Run ESLint
 - Design system with Tailwind CSS v4
 - Responsive layouts for mobile and desktop
 - Route protection middleware
+- Entity listing page with grid/list views
+- Entity type filtering and URL-based navigation
+- Real-time search functionality
+- Type-specific visual styling system
+- Entity detail page with URL parameters
+- Label-based sub-filtering UI
+- Notion-style text editor with Tiptap
+- Slash commands for quick formatting
+- Entity mentions with @ autocomplete
+- Real-time character and word counting
 
 ### 🚧 In Progress
 - Database schema design for lore entities
 - Planning API architecture
+- Entity label assignment (UI complete, backend pending)
 
 ### 📋 Planned
 - Universe, Book, and Chapter models
-- Entity models (Character, Location, Item, Organization)
+- Entity models with relationships (Character, Location, Item, Organization)
 - Moment and timeline functionality
 - Entity relationships system
 - Custom fields for entities
-- Search functionality
+- Advanced search with filters
 - Graph view for entity relationships
 - Real-time collaboration features
+- Rich text editor integration
 
 ## Key Technologies
 
@@ -162,8 +211,10 @@ npm run lint     # Run ESLint
 | NextAuth.js | 4.24.11 | Authentication |
 | Prisma | 6.16.3 | ORM |
 | PostgreSQL | Latest | Database |
+| Tiptap | 3.6.5 | Rich text editor |
 | bcryptjs | 3.0.2 | Password hashing |
 | Lucide React | 0.545.0 | Icons |
+| tippy.js | 6.3.7 | Tooltip/popover positioning |
 
 ## Architecture Overview
 
@@ -241,6 +292,7 @@ When contributing to this project:
 - **Architecture questions**: Check [Project Architecture](./System/project_architecture.md)
 - **Database questions**: Check [Database Schema](./System/database_schema.md)
 - **Auth questions**: Check [Authentication System](./System/authentication_system.md)
+- **Editor questions**: Check [Text Editor System](./System/text_editor_system.md)
 - **Process questions**: Check SOP docs (when available)
 - **Feature questions**: Check Tasks docs (when available)
 

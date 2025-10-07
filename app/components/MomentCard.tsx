@@ -17,8 +17,7 @@ export default function MomentCard({
   chapter,
   moment,
   content,
-  isExpanded = false,
-  onEdit
+  isExpanded = false
 }: MomentCardProps) {
   return (
     <div className="relative pl-8 pb-6">

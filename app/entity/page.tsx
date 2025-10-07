@@ -14,7 +14,6 @@ import NewEntityModal from '../components/NewEntityModal';
 export default function EntityPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const entityId = searchParams.get('id') || '1';
   const entityType = searchParams.get('type') || 'character';
 
   const [sidebarOpen, setSidebarOpen] = useState(false);

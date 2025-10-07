@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Menu, Search, Filter, Plus, BookOpen, Workflow } from 'lucide-react';
 import Link from 'next/link';
 import Sidebar from '../components/Sidebar';
@@ -15,7 +15,7 @@ export default function TimelinePage() {
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // Mock timeline moments data - extended list for infinite scroll
-  const allMoments = [
+  const allMoments = useMemo(() => [
     {
       id: '4',
       book: 'Book 1',
@@ -163,13 +163,29 @@ export default function TimelinePage() {
       moment: 'Moment 20',
       content: 'The Razor Crest soared through hyperspace, the Mandalorian and Grogu on another adventure across the Outer Rim territories...'
     }
-  ];
+  ], []);
 
   const [displayedMoments, setDisplayedMoments] = useState(allMoments.slice(0, 10));
   const [loading, setLoading] = useState(false);
 
   // Infinite scroll observer
   useEffect(() => {
+    const loadMoreMoments = () => {
+      const currentLength = displayedMoments.length;
+      const hasMoreToLoad = currentLength < allMoments.length;
+
+      if (hasMoreToLoad && !loading) {
+        setLoading(true);
+
+        // Simulate loading delay for smooth animation
+        setTimeout(() => {
+          const nextMoments = allMoments.slice(currentLength, currentLength + 5);
+          setDisplayedMoments([...displayedMoments, ...nextMoments]);
+          setLoading(false);
+        }, 300);
+      }
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !loading) {
@@ -184,23 +200,7 @@ export default function TimelinePage() {
     }
 
     return () => observer.disconnect();
-  }, [displayedMoments, loading]);
-
-  const loadMoreMoments = () => {
-    const currentLength = displayedMoments.length;
-    const hasMoreToLoad = currentLength < allMoments.length;
-
-    if (hasMoreToLoad && !loading) {
-      setLoading(true);
-
-      // Simulate loading delay for smooth animation
-      setTimeout(() => {
-        const nextMoments = allMoments.slice(currentLength, currentLength + 5);
-        setDisplayedMoments([...displayedMoments, ...nextMoments]);
-        setLoading(false);
-      }, 300);
-    }
-  };
+  }, [displayedMoments, loading, allMoments]);
 
   // Mock books data
   const booksData = [
