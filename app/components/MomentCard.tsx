@@ -1,6 +1,7 @@
 'use client';
 
 import { Edit } from 'lucide-react';
+import Link from 'next/link';
 
 interface MomentCardProps {
   book: string;
@@ -60,13 +61,13 @@ export default function MomentCard({
 
         {/* Edit button (only show when expanded) */}
         {isExpanded && (
-          <button
-            onClick={onEdit}
-            className="flex items-center gap-2 px-4 py-2 bg-accent text-white-text rounded-lg text-sm font-medium hover:brightness-110 transition-all"
+          <Link
+            href="/write"
+            className="flex items-center gap-2 px-4 py-2 bg-accent text-white-text rounded-lg text-sm font-medium hover:brightness-110 transition-all w-fit"
           >
             <Edit className="w-4 h-4" />
             Edit Moment
-          </button>
+          </Link>
         )}
       </div>
     </div>
