@@ -9,6 +9,8 @@ interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
   onAddEntity?: () => void;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const navigationItems = [
@@ -23,9 +25,13 @@ const entityItems = [
   { icon: Building2, label: 'Organizations', href: '/entities?type=organization' },
 ];
 
-export default function Sidebar({ isOpen = true, onClose, onAddEntity }: SidebarProps) {
+export default function Sidebar({ isOpen = true, onClose, onAddEntity, isExpanded: controlledIsExpanded, onToggleExpand }: SidebarProps) {
   const pathname = usePathname();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [internalIsExpanded, setInternalIsExpanded] = useState(true);
+
+  // Use controlled state if provided, otherwise use internal state
+  const isExpanded = controlledIsExpanded !== undefined ? controlledIsExpanded : internalIsExpanded;
+  const handleToggleExpand = onToggleExpand || (() => setInternalIsExpanded(!internalIsExpanded));
 
   return (
     <>
@@ -53,7 +59,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
           )}
 
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={handleToggleExpand}
             className={`p-2 rounded-lg text-light-text hover:text-white-text hover:bg-card transition-colors flex-shrink-0 ${!isExpanded ? 'mx-auto' : ''}`}
             title={isExpanded ? "Collapse" : "Expand"}
           >

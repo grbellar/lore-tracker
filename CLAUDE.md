@@ -27,9 +27,10 @@ We should always update .agent docs after we implement new features or make chan
 BEFORE YOU PLAN ANY IMPLEMENTATION, always read the .agent/README first to get context
 
 ## Development Commands
+THE SERVER IS USUALLY ALREADY RUNNING AND YOU DON'T NEED TO START IT TO TEST.
 
 ```bash
-# Start development server with Turbopack
+# Start development server with Turbopack BUT FIRST check to see if the server is already running. It most likely is. Only start the server if needed.
 npm run dev
 
 # Build for production with Turbopack

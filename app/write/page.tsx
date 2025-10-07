@@ -13,9 +13,18 @@ export default function WritePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [entityModalOpen, setEntityModalOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [editorContent, setEditorContent] = useState('');
   const [characterCount, setCharacterCount] = useState(0);
   const [wordCount, setWordCount] = useState(0);
+
+  const handleExpand = () => {
+    setIsExpanded(!isExpanded);
+    // Collapse sidebar when expanding to full screen
+    if (!isExpanded) {
+      setSidebarExpanded(false);
+    }
+  };
 
   // Hard-coded data
   const breadcrumbItems = [
@@ -80,6 +89,8 @@ export default function WritePage() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onAddEntity={() => setEntityModalOpen(true)}
+        isExpanded={sidebarExpanded}
+        onToggleExpand={() => setSidebarExpanded(!sidebarExpanded)}
       />
 
       {/* New Entity Modal */}
@@ -101,7 +112,7 @@ export default function WritePage() {
         </div>
 
         {/* Content Container */}
-        <div className="max-w-7xl mx-auto pl-4 sm:pl-6 lg:pl-8 pr-2 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Breadcrumb */}
           {!isExpanded && (
             <div className="mb-8">
@@ -110,9 +121,9 @@ export default function WritePage() {
           )}
 
           {/* Two Column Layout */}
-          <div className={`grid grid-cols-1 ${isExpanded ? '' : 'lg:grid-cols-3'} gap-8 transition-all duration-300`}>
+          <div className={`grid grid-cols-1 ${isExpanded ? '' : 'lg:grid-cols-12'} gap-8 transition-all duration-300`}>
             {/* Main Content - Left Side */}
-            <div className={`transition-all duration-300 ${isExpanded ? 'max-w-4xl mx-auto' : 'lg:col-span-2'}`}>
+            <div className={`transition-all duration-300 ${isExpanded ? 'max-w-4xl mx-auto' : 'lg:col-span-7'}`}>
               {/* Article Header */}
               <ArticleHeader
                 title={articleData.title}
@@ -120,7 +131,7 @@ export default function WritePage() {
                 characterCount={characterCount}
                 wordCount={wordCount}
                 readTime={articleData.readTime}
-                onExpand={() => setIsExpanded(!isExpanded)}
+                onExpand={handleExpand}
               />
 
               {/* Editor */}
@@ -133,7 +144,7 @@ export default function WritePage() {
             </div>
 
             {/* Sidebar - Right Side */}
-            <div className={`space-y-6 transition-all duration-300 ${isExpanded ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
+            <div className={`lg:col-span-5 space-y-6 transition-all duration-300 ${isExpanded ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
               <EntityCard {...entityCardData} />
             </div>
           </div>

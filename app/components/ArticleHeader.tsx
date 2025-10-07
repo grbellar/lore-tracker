@@ -22,13 +22,13 @@ export default function ArticleHeader({
 }: ArticleHeaderProps) {
   return (
     <div className="mb-8">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 gap-4">
         <h1 className="text-4xl md:text-5xl font-bold text-white-text">
           {title}
         </h1>
         <button
           onClick={onExpand}
-          className="p-2 rounded-lg text-light-text hover:text-white-text hover:bg-card-on-card transition-colors"
+          className="flex-shrink-0 p-2 rounded-lg text-light-text hover:text-white-text hover:bg-card-on-card transition-colors"
         >
           <Maximize2 className="w-5 h-5" />
         </button>

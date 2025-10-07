@@ -22,12 +22,12 @@ export default function MomentCard({
   return (
     <div className="relative pl-8 pb-6">
       {/* Timeline line */}
-      <div className="absolute left-[7px] top-0 bottom-0 w-[2px] bg-accent/40" />
+      <div className="absolute left-[6px] top-0 bottom-0 w-1 bg-accent/40 rounded-full" />
 
       {/* Timeline dot */}
       {isExpanded ? (
-        // Larger active dot with ring
-        <div className="absolute left-[-1px] top-2 w-5 h-5 rounded-full bg-accent border-4 border-accent/20 z-10" />
+        // Larger active dot - hollow with thicker ring
+        <div className="absolute left-[0px] top-2 w-5 h-5 rounded-full bg-card-on-card border-[3px] border-accent z-10" />
       ) : (
         // Smaller inactive dot
         <div className="absolute left-[3px] top-2 w-3 h-3 rounded-full bg-card-on-card border-2 border-accent/60 z-10" />
@@ -36,7 +36,7 @@ export default function MomentCard({
       <div className={`
         rounded-lg p-4 transition-all
         ${isExpanded
-          ? 'bg-card-on-card border border-accent'
+          ? 'bg-card-on-card border-2 border-accent'
           : 'bg-card hover:bg-card-on-card cursor-pointer'
         }
       `}>
@@ -54,7 +54,7 @@ export default function MomentCard({
         </div>
 
         {/* Content */}
-        <p className="text-sm text-light-text leading-relaxed mb-3">
+        <p className={`text-sm leading-relaxed mb-3 ${isExpanded ? 'text-white' : 'text-light-text'}`}>
           {content}
         </p>
 
