@@ -261,7 +261,7 @@ export default function TimelinePage() {
         </div>
 
         {/* Header with Title and Actions */}
-        <div className="border-b border-card-on-card">
+        <div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               {/* Title */}

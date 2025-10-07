@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Menu, Trash2, Plus } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Menu, Trash2, Plus, ArrowLeft } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Breadcrumb from '../components/Breadcrumb';
 import EntityHeader from '../components/EntityHeader';
@@ -11,14 +12,30 @@ import MomentsList from '../components/MomentsList';
 import NewEntityModal from '../components/NewEntityModal';
 
 export default function EntityPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const entityId = searchParams.get('id') || '1';
+  const entityType = searchParams.get('type') || 'character';
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [entityModalOpen, setEntityModalOpen] = useState(false);
 
+  // Get entity type label for breadcrumb
+  const getTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      character: 'Character',
+      location: 'Location',
+      item: 'Item',
+      organization: 'Organization'
+    };
+    return labels[type] || 'Entity';
+  };
+
   // Hard-coded data
-  const breadcrumbItems = [
-    { label: 'Character' },
+  const breadcrumbItems = useMemo(() => [
+    { label: getTypeLabel(entityType) },
     { label: 'Jedi' }
-  ];
+  ], [entityType]);
 
   const entityData = {
     name: 'Luke Skywalker',
@@ -229,6 +246,15 @@ Guided by the wisdom of Obi-Wan and later Yoda, Luke honed his Force abilities a
 
         {/* Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Back Button */}
+          <button
+            onClick={() => router.push(`/entities?type=${entityType}`)}
+            className="flex items-center gap-2 text-light-text hover:text-white-text transition-colors mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">Back to {getTypeLabel(entityType)}s</span>
+          </button>
+
           {/* Breadcrumb and Actions */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2">

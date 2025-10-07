@@ -17,10 +17,10 @@ const navigationItems = [
 ];
 
 const entityItems = [
-  { icon: Users, label: 'Characters', href: '/entity' },
-  { icon: MapPin, label: 'Locations', href: '/locations' },
-  { icon: Package, label: 'Items', href: '/items' },
-  { icon: Building2, label: 'Organizations', href: '/organizations' },
+  { icon: Users, label: 'Characters', href: '/entities?type=character' },
+  { icon: MapPin, label: 'Locations', href: '/entities?type=location' },
+  { icon: Package, label: 'Items', href: '/entities?type=item' },
+  { icon: Building2, label: 'Organizations', href: '/entities?type=organization' },
 ];
 
 export default function Sidebar({ isOpen = true, onClose, onAddEntity }: SidebarProps) {
@@ -49,7 +49,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
         {/* Logo and Collapse Toggle */}
         <div className="flex items-center justify-between w-full">
           {isExpanded && (
-            <span className="text-lg font-semibold text-white-text">Lore Tracker</span>
+            <span className="text-2xl font-semibold text-white-text">Lore Tracker</span>
           )}
 
           <button
@@ -80,7 +80,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
                 ${isExpanded ? 'gap-3 p-3' : 'p-3 justify-center'}
                 ${pathname === item.href
                   ? 'bg-card text-white-text border-2 border-accent'
-                  : 'bg-card text-light-text hover:text-white-text hover:bg-card-on-card border-2 border-transparent'
+                  : 'text-light-text hover:text-white-text hover:bg-card/50'
                 }
               `}
               title={item.label}
@@ -108,7 +108,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
                 ${isExpanded ? 'gap-3 p-3' : 'p-3 justify-center'}
                 ${pathname === item.href
                   ? 'bg-card text-white-text border-2 border-accent'
-                  : 'bg-card text-light-text hover:text-white-text hover:bg-card-on-card border-2 border-transparent'
+                  : 'text-light-text hover:text-white-text hover:bg-card/50'
                 }
               `}
               title={item.label}
@@ -122,7 +122,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
           <button
             onClick={onAddEntity}
             className={`
-              flex items-center rounded-xl bg-card text-light-text hover:text-white-text hover:bg-card-on-card transition-colors border border-dashed border-foreground hover:border-light-text
+              flex items-center rounded-xl text-light-text hover:text-white-text hover:bg-card/50 transition-colors border border-dashed border-foreground hover:border-light-text
               ${isExpanded ? 'gap-3 p-3' : 'p-3 justify-center'}
             `}
             title="Create New"
@@ -136,7 +136,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
         <div className="flex flex-col gap-2">
           <button
             className={`
-              flex items-center rounded-xl bg-card text-light-text hover:text-white-text hover:bg-card-on-card transition-colors
+              flex items-center rounded-xl text-light-text hover:text-white-text hover:bg-card/50 transition-colors
               ${isExpanded ? 'gap-3 p-3' : 'p-3 justify-center'}
             `}
             title="Graph View"
@@ -146,7 +146,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
           </button>
           <button
             className={`
-              flex items-center rounded-xl bg-card text-light-text hover:text-white-text hover:bg-card-on-card transition-colors
+              flex items-center rounded-xl text-light-text hover:text-white-text hover:bg-card/50 transition-colors
               ${isExpanded ? 'gap-3 p-3' : 'p-3 justify-center'}
             `}
             title="Settings"
@@ -156,7 +156,7 @@ export default function Sidebar({ isOpen = true, onClose, onAddEntity }: Sidebar
           </button>
           <button
             className={`
-              flex items-center rounded-xl bg-card text-light-text hover:text-white-text hover:bg-card-on-card transition-colors
+              flex items-center rounded-xl text-light-text hover:text-white-text hover:bg-card/50 transition-colors
               ${isExpanded ? 'gap-3 p-3' : 'p-3 justify-center'}
             `}
             title="Profile"

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, Moon, Search, Edit3, Users, MapPin, Building2, Clock } from 'lucide-react';
+import { Menu, Search, Edit3, Users, MapPin, Building2, Clock } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import NewEntityModal from '../components/NewEntityModal';
 import Link from 'next/link';
@@ -57,31 +57,40 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Content Container */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-white-text mb-2">Universe Dashboard</h1>
-                <p className="text-light-text">Welcome back to the Star Wars Universe. Here&apos;s what&apos;s happening in your universe.</p>
+        {/* Header with Title and Actions */}
+        <div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              {/* Title */}
+              <div>
+                <h1 className="text-2xl font-bold text-white-text mb-1">Universe Dashboard</h1>
+                <p className="text-sm text-light-text">Welcome back to the Star Wars Universe. Here&apos;s what&apos;s happening in your universe.</p>
               </div>
 
-              <div className="flex items-center gap-3 flex-wrap lg:flex-nowrap">
-                <button className="p-2 rounded-lg text-light-text hover:text-white-text hover:bg-card-on-card transition-colors">
-                  <Moon className="w-5 h-5" />
-                </button>
-                <button className="flex items-center gap-3 px-6 py-2.5 bg-card rounded-lg text-light-text hover:text-white-text hover:bg-card-on-card transition-colors min-w-[200px]">
-                  <Search className="w-5 h-5" />
-                  <span>Search</span>
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-accent text-white-text rounded-lg hover:brightness-110 transition-all">
-                  <Edit3 className="w-5 h-5" />
+              {/* Top Right Actions */}
+              <div className="flex items-center gap-3">
+                {/* Search Bar */}
+                <div className="relative flex-1 sm:flex-none sm:w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-light-text" />
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    className="w-full pl-10 pr-4 py-2 bg-card border border-card-on-card rounded-lg text-sm text-white-text placeholder-light-text focus:outline-none focus:border-accent transition-colors"
+                  />
+                </div>
+
+                {/* Continue Writing Button */}
+                <Link href="/write" className="flex items-center gap-2 px-4 py-2 bg-accent text-white-text rounded-lg text-sm font-medium hover:brightness-110 transition-all whitespace-nowrap">
+                  <Edit3 className="w-4 h-4" />
                   Continue Writing
-                </button>
+                </Link>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Content Container */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

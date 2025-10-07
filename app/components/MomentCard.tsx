@@ -49,7 +49,7 @@ export default function MomentCard({
           <span className="px-2 py-1 rounded text-xs bg-accent/20 text-accent">
             {chapter}
           </span>
-          <span className="px-2 py-1 rounded text-xs bg-accent text-white-text">
+          <span className="px-2 py-1 rounded text-xs bg-accent/20 text-accent">
             {moment}
           </span>
         </div>

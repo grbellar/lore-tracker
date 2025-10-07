@@ -55,6 +55,7 @@ lore-tracker-react/
 │   │   ├── EntityCard.tsx        # Entity info with book/chapter hierarchy
 │   │   ├── EntityHeader.tsx      # Entity page header
 │   │   ├── EntityLink.tsx        # Inline clickable entity references
+│   │   ├── EntityListCard.tsx    # Entity list card with grid/list modes
 │   │   ├── MomentCard.tsx        # Timeline moment display
 │   │   ├── MomentsList.tsx       # Grouped moments by book/chapter
 │   │   ├── NewEntityModal.tsx    # Global entity creation modal
@@ -63,6 +64,8 @@ lore-tracker-react/
 │   │   └── Sidebar.tsx           # Main navigation sidebar
 │   ├── dashboard/
 │   │   └── page.tsx              # Universe overview dashboard
+│   ├── entities/
+│   │   └── page.tsx              # Entity listing page with grid/list views
 │   ├── entity/
 │   │   └── page.tsx              # Entity detail view
 │   ├── timeline/
@@ -88,13 +91,14 @@ lore-tracker-react/
 
 ### Page Structure
 
-The application consists of 5 main pages:
+The application consists of 6 main pages:
 
 1. **Home (`/`)**: Auto-redirects to `/dashboard`
 2. **Dashboard (`/dashboard`)**: Universe overview with stats, writing progress, quick access, and recent activity
 3. **Write (`/write`)**: Main writing/reading interface with article content and entity sidebar
-4. **Entity (`/entity`)**: Detailed entity view with description, moments list, custom fields, and relationships
-5. **Timeline (`/timeline`)**: Timeline view with infinite scrolling moments organized by book/chapter
+4. **Entities (`/entities`)**: Unified entity listing page with grid/list views, filtering by type, and search functionality
+5. **Entity (`/entity`)**: Detailed entity view with description, moments list, custom fields, and relationships
+6. **Timeline (`/timeline`)**: Timeline view with infinite scrolling moments organized by book/chapter
 
 ### Authentication Pages
 
@@ -110,6 +114,7 @@ The application consists of 5 main pages:
 #### Entity Components
 - **NewEntityModal**: Global modal for entity creation (managed at page level)
 - **EntityCard**: Displays entity info with collapsible book/chapter hierarchy
+- **EntityListCard**: Reusable card component for entity list with grid/list view modes
 - **EntityHeader**: Entity page header with name, stats, and metadata
 - **EntityLink**: Clickable inline entity references in content
 
