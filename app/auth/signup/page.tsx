@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
 
 export default function SignUp() {
@@ -49,7 +50,21 @@ export default function SignUp() {
         return
       }
 
-      router.push("/auth/signin?registered=true")
+      // Automatically sign in the user after successful registration
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("Account created but sign in failed. Please sign in manually.")
+        router.push("/auth/signin")
+        return
+      }
+
+      // Redirect to dashboard on success
+      router.push("/dashboard")
     } catch (error) {
       setError("An error occurred. Please try again.")
     } finally {
