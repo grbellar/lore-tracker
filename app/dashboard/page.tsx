@@ -64,7 +64,7 @@ export default function DashboardPage() {
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-white-text mb-2">Universe Dashboard</h1>
-                <p className="text-light-text">Welcome back to the Star Wars Universe. Here's what's happening in your universe.</p>
+                <p className="text-light-text">Welcome back to the Star Wars Universe. Here&apos;s what&apos;s happening in your universe.</p>
               </div>
 
               <div className="flex items-center gap-3 flex-wrap lg:flex-nowrap">
