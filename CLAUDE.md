@@ -2,9 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+# DOCS
+We keep all important docs in `.agent` folder and keep updating them, structure like below:
 
-A lore tracker application for managing narrative content (books, chapters, characters, locations, etc.) built with Next.js 15, React 19, TypeScript, and Tailwind CSS v4.
+```
+.agent/
+├── README.md                           # Index of all documentation
+├── Tasks/                              # PRD & implementation plans for each feature
+│   └── ...
+├── System/                            # Current state of the system. Examples include:
+│   ├── project_architecture.md        # Project structure, tech stack, integration points
+│   ├── database_schema.md            # Database schema & relationships
+│   ├── authentication_system.md      # Auth flow & security
+│   └── ...
+└── SOP/                              # Best practices & procedures. Examples include:
+    ├── schema_migration.md           # How to add schema migrations
+    ├── new_page_route.md            # How to add new page routes
+    ├── component_creation.md        # How to create new components
+    └── ...
+```
+
+We should always update .agent docs after we implement new features or make changes to the codebase, to make sure it fully reflect the up to date information
+
+BEFORE YOU PLAN ANY IMPLEMENTATION, always read the .agent/README first to get context
 
 ## Development Commands
 
@@ -23,69 +43,3 @@ npm run lint
 ```
 
 Development server runs at http://localhost:3000
-
-## Architecture
-
-### Component Structure
-
-The app follows a component-based architecture with reusable UI components:
-
-- **Sidebar** (`app/components/Sidebar.tsx`): Main navigation with icon-based menu. Takes `onAddEntity` callback to open the entity modal from anywhere in the app.
-- **NewEntityModal** (`app/components/NewEntityModal.tsx`): Global modal for creating entities. Managed at the page level and can be triggered from any page via the sidebar.
-- **ArticleHeader**: Displays chapter/article metadata (title, last updated, character count, word count, read time)
-- **ArticleContent**: Renders paragraphs with embedded entity links
-- **EntityLink**: Clickable entity references that appear inline in content
-- **Breadcrumb**: Navigation breadcrumbs for book/chapter hierarchy
-
-### State Management Pattern
-
-Modal state is managed at the page level and passed down via props. The `NewEntityModal` is rendered in the page component and controlled by the `entityModalOpen` state, which is toggled by the sidebar's plus button via the `onAddEntity` callback.
-
-### Styling System
-
-Uses Tailwind CSS v4 with a custom design system defined in `app/globals.css`:
-
-**Color Tokens** (use these Tailwind classes):
-- `bg-background` / `text-background`: Main dark background (#101014)
-- `bg-card` / `border-card`: Component backgrounds (#17171C)
-- `bg-card-on-card`: Nested card backgrounds (#202027)
-- `bg-foreground`: Tertiary backgrounds (#292932)
-- `text-light-text`: Secondary text (#ABABBA)
-- `text-white-text`: Primary text (#FFFFFF)
-- `bg-accent` / `text-accent`: Brand color (#6F6CED)
-
-**Typography**:
-- Font: Lexend (loaded via next/font/google)
-- Font variable: `--font-lexend`
-
-### Tech Stack Details
-
-- **Next.js 15.5.4**: App Router, Server Components, Turbopack for fast builds
-- **React 19.1.0**: Latest React with concurrent features
-- **TypeScript 5**: Strict mode enabled
-- **Tailwind CSS v4**: Using `@tailwindcss/postcss` with inline theme config
-- **Lucide React**: Icon library for UI icons
-
-### File Organization
-
-```
-app/
-├── components/       # Reusable UI components
-├── page.tsx         # Home page with article reader
-├── layout.tsx       # Root layout with font configuration
-└── globals.css      # Design system tokens and theme
-```
-
-### Component Patterns
-
-All components use:
-- `'use client'` directive for client-side interactivity
-- TypeScript interfaces for props
-- Tailwind utility classes (no custom CSS)
-- Lucide icons for iconography
-
-When creating new modals or overlays, follow the pattern in `NewEntityModal.tsx`:
-- Backdrop with `fixed inset-0 bg-black/60 z-50`
-- Click outside to close
-- Proper z-index layering
-- Prevent event propagation on modal content
