@@ -4,18 +4,15 @@ import { Edit } from 'lucide-react';
 import Link from 'next/link';
 
 interface MomentCardProps {
-  book: string;
-  chapter: string;
-  moment: string;
+  id: string;
+  title: string;
   content: string;
   isExpanded?: boolean;
-  onEdit?: () => void;
 }
 
 export default function MomentCard({
-  book,
-  chapter,
-  moment,
+  id,
+  title,
   content,
   isExpanded = false
 }: MomentCardProps) {
@@ -40,28 +37,20 @@ export default function MomentCard({
           : 'bg-card hover:bg-card-on-card cursor-pointer'
         }
       `}>
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="px-2 py-1 rounded text-xs bg-accent/20 text-accent">
-            {book}
-          </span>
-          <span className="px-2 py-1 rounded text-xs bg-accent/20 text-accent">
-            {chapter}
-          </span>
-          <span className="px-2 py-1 rounded text-xs bg-accent/20 text-accent">
-            {moment}
-          </span>
-        </div>
+        {/* Title */}
+        <h3 className={`text-base font-semibold mb-2 ${isExpanded ? 'text-white-text' : 'text-white-text/90'}`}>
+          {title || 'Untitled Moment'}
+        </h3>
 
-        {/* Content */}
+        {/* Content preview */}
         <p className={`text-sm leading-relaxed mb-3 ${isExpanded ? 'text-white' : 'text-light-text'}`}>
-          {content}
+          {content || 'No content yet...'}
         </p>
 
         {/* Edit button (only show when expanded) */}
         {isExpanded && (
           <Link
-            href="/write"
+            href={`/write?moment=${id}`}
             className="flex items-center gap-2 px-4 py-2 bg-accent text-white-text rounded-lg text-sm font-medium hover:brightness-110 transition-all w-fit"
           >
             <Edit className="w-4 h-4" />

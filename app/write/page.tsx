@@ -1,22 +1,82 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Menu } from 'lucide-react';
+import { useMoment } from '../hooks/useMoment';
 import Sidebar from '../components/Sidebar';
 import Breadcrumb from '../components/Breadcrumb';
 import ArticleHeader from '../components/ArticleHeader';
 import Editor from '../components/Editor';
 import NewEntityModal from '../components/NewEntityModal';
 import EntityCard from '../components/EntityCard';
+import Toast from '../components/Toast';
 
 export default function WritePage() {
+  const searchParams = useSearchParams();
+  const momentIdFromUrl = searchParams.get('moment');
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [entityModalOpen, setEntityModalOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [title, setTitle] = useState('');
   const [editorContent, setEditorContent] = useState('');
   const [characterCount, setCharacterCount] = useState(0);
   const [wordCount, setWordCount] = useState(0);
+  const [currentMomentId, setCurrentMomentId] = useState<string | null>(null);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState<Date | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [isLoadingMoment, setIsLoadingMoment] = useState(false);
+
+  const { loading, error, success, saveMoment, updateMoment, clearStatus } = useMoment();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedContent = useRef({ title: '', content: '' });
+  const hasLoadedMoment = useRef(false);
+
+  // Function to load a moment by ID
+  const loadMoment = useCallback(async (momentId: string) => {
+    setIsLoadingMoment(true);
+    try {
+      const response = await fetch(`/api/moments/${momentId}?fields=full`);
+
+      if (!response.ok) {
+        throw new Error('Failed to load moment');
+      }
+
+      const result = await response.json();
+      const moment = result.data;
+
+      // Populate the editor with moment data
+      setTitle(moment.title || '');
+      setEditorContent(moment.content || '');
+      setCurrentMomentId(moment.id);
+      setLastUpdatedTime(new Date(moment.updated_at));
+
+      // Update last saved content to prevent immediate auto-save
+      lastSavedContent.current = {
+        title: moment.title || '',
+        content: moment.content || ''
+      };
+    } catch (err) {
+      setToastMessage('Failed to load moment');
+      setToastType('error');
+      setShowToast(true);
+    } finally {
+      setIsLoadingMoment(false);
+    }
+  }, [error]);
+
+  // Load moment from URL parameter if provided
+  useEffect(() => {
+    if (momentIdFromUrl && !hasLoadedMoment.current) {
+      hasLoadedMoment.current = true;
+      loadMoment(momentIdFromUrl);
+    }
+  }, [momentIdFromUrl, loadMoment]);
 
   const handleExpand = () => {
     setIsExpanded(!isExpanded);
@@ -26,17 +86,112 @@ export default function WritePage() {
     }
   };
 
+  // Format last updated time
+  const formatLastUpdated = (date: Date | null): string => {
+    if (!date) return 'Never';
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const updateDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    if (today.getTime() === updateDate.getTime()) {
+      // If today, show time only
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } else {
+      // If not today, show date
+      return date.toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+  };
+
+  // Auto-save function
+  const performSave = useCallback(async () => {
+    // Don't save if both title and content are empty
+    if (!title.trim() && !editorContent.trim()) {
+      return;
+    }
+
+    // Check if content actually changed
+    if (title === lastSavedContent.current.title && editorContent === lastSavedContent.current.content) {
+      return;
+    }
+
+    try {
+      setSaveStatus('saving');
+
+      if (currentMomentId) {
+        // Update existing moment
+        await updateMoment(currentMomentId, {
+          title,
+          content: editorContent,
+        });
+      } else {
+        // Create new moment
+        const newMoment = await saveMoment({
+          title,
+          content: editorContent,
+        });
+        setCurrentMomentId(newMoment.id);
+      }
+
+      // Update last saved content and timestamp
+      lastSavedContent.current = { title, content: editorContent };
+      setLastUpdatedTime(new Date());
+
+      setSaveStatus('saved');
+
+      // Reset to idle after showing "Saved" for 2 seconds
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 2000);
+    } catch (err) {
+      setSaveStatus('idle');
+      setToastMessage(error || 'Failed to save moment');
+      setToastType('error');
+      setShowToast(true);
+    }
+  }, [title, editorContent, currentMomentId, saveMoment, updateMoment, error]);
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Don't set timeout if both title and content are empty
+    if (!title.trim() && !editorContent.trim()) {
+      return;
+    }
+
+    // Set new timeout for auto-save (3 seconds after last edit)
+    saveTimeoutRef.current = setTimeout(() => {
+      performSave();
+    }, 3000);
+
+    // Cleanup on unmount
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [title, editorContent, performSave]);
+
   // Hard-coded data
   const breadcrumbItems = [
     { label: 'Book 1' },
     { label: 'Chapter 1' }
   ];
 
-  const articleData = {
-    title: 'The Man in the Goggles',
-    lastUpdated: 'August 20, 2025',
-    readTime: '15 Minute Read'
-  };
+  const lastUpdated = formatLastUpdated(lastUpdatedTime);
+  const readTime = Math.ceil(wordCount / 200) + ' Minute Read';
 
   const entityCardData = {
     type: 'CHARACTER',
@@ -124,23 +279,35 @@ export default function WritePage() {
           <div className={`grid grid-cols-1 ${isExpanded ? '' : 'lg:grid-cols-12'} gap-8 transition-all duration-300`}>
             {/* Main Content - Left Side */}
             <div className={`transition-all duration-300 ${isExpanded ? 'max-w-4xl mx-auto' : 'lg:col-span-7'}`}>
-              {/* Article Header */}
-              <ArticleHeader
-                title={articleData.title}
-                lastUpdated={articleData.lastUpdated}
-                characterCount={characterCount}
-                wordCount={wordCount}
-                readTime={articleData.readTime}
-                onExpand={handleExpand}
-              />
+              {isLoadingMoment ? (
+                /* Loading state */
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin mb-4" />
+                  <p className="text-light-text">Loading moment...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Article Header */}
+                  <ArticleHeader
+                    title={title}
+                    lastUpdated={lastUpdated}
+                    characterCount={characterCount}
+                    wordCount={wordCount}
+                    readTime={readTime}
+                    onExpand={handleExpand}
+                    onTitleChange={setTitle}
+                    saveStatus={saveStatus}
+                  />
 
-              {/* Editor */}
-              <Editor
-                content={editorContent}
-                onUpdate={setEditorContent}
-                onCharacterCountUpdate={setCharacterCount}
-                onWordCountUpdate={setWordCount}
-              />
+                  {/* Editor */}
+                  <Editor
+                    content={editorContent}
+                    onUpdate={setEditorContent}
+                    onCharacterCountUpdate={setCharacterCount}
+                    onWordCountUpdate={setWordCount}
+                  />
+                </>
+              )}
             </div>
 
             {/* Sidebar - Right Side */}
@@ -150,6 +317,18 @@ export default function WritePage() {
           </div>
         </div>
       </main>
+
+      {/* Toast Notifications */}
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => {
+            setShowToast(false);
+            clearStatus();
+          }}
+        />
+      )}
     </div>
   );
 }

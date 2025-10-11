@@ -8,6 +8,7 @@
   --light-text: #ABABBA;
   --white-text: #FFFFFF;
   --accent: #6F6CED;
+  --accent-primary: #6F6CED;
   --accent-20: rgba(111, 108, 237, 0.2);
 }
 
@@ -19,6 +20,7 @@
   --color-light-text: var(--light-text);
   --color-white-text: var(--white-text);
   --color-accent: var(--accent);
+  --color-accent-primary: var(--accent-primary);
   --color-accent-20: var(--accent-20);
   --font-sans: var(--font-lexend);
 }
@@ -27,4 +29,19 @@ body {
   background: var(--background);
   color: var(--white-text);
   font-family: var(--font-lexend), system-ui, sans-serif;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
 }

@@ -42,14 +42,14 @@ BEFORE YOU PLAN ANY IMPLEMENTATION, always read the .agent/README first to get c
 # Check if services are running
 docker ps
 
-# Start all services (web app, PostgreSQL, Neo4j)
-docker-compose up
+# Start all services (web app, PostgreSQL, Neo4j) - DEVELOPMENT
+docker-compose -f docker-compose.dev.yml up
 
-# Start services in background
-docker-compose up -d
+# Start services in background - DEVELOPMENT
+docker-compose -f docker-compose.dev.yml up -d
 
-# Stop all services
-docker-compose down
+# Stop all services - DEVELOPMENT
+docker-compose -f docker-compose.dev.yml down
 
 # View logs
 docker logs loretracker-web-dev -f        # Web app logs
@@ -57,21 +57,21 @@ docker logs loretracker-postgres-dev -f   # PostgreSQL logs
 docker logs loretracker-neo4j-dev -f      # Neo4j logs
 
 # Restart web app only
-docker-compose restart web
+docker-compose -f docker-compose.dev.yml restart web
 
 # Rebuild after dependency changes
-docker-compose up --build
+docker-compose -f docker-compose.dev.yml up --build
 
 # Run commands inside container
-docker-compose exec web npm run lint      # Run linter
-docker-compose exec web npm test          # Run tests
-docker-compose exec web npm run build     # Build for production
+docker-compose -f docker-compose.dev.yml exec web npm run lint      # Run linter
+docker-compose -f docker-compose.dev.yml exec web npm test          # Run tests
+docker-compose -f docker-compose.dev.yml exec web npm run build     # Build for production
 ```
 
 ### Access Points
 - **Web App**: http://localhost:3000
-- **Neo4j Browser**: http://localhost:7474 (username: `neo4j`, password: `testpassword`)
-- **PostgreSQL**: localhost:5432
+- **Neo4j Browser**: http://localhost:7474 (username: `neo4j`, password: `secretdev`)
+- **PostgreSQL**: localhost:5432 (password: `secret`)
 
 ### Local Development (Without Docker)
 

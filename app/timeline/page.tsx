@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Menu, Search, Filter, Plus, BookOpen, Workflow } from 'lucide-react';
 import Link from 'next/link';
+import { useMomentList } from '../hooks/useMomentList';
 import Sidebar from '../components/Sidebar';
 import NewEntityModal from '../components/NewEntityModal';
 import MomentCard from '../components/MomentCard';
@@ -10,186 +11,25 @@ import MomentCard from '../components/MomentCard';
 export default function TimelinePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [entityModalOpen, setEntityModalOpen] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>('5');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Mock timeline moments data - extended list for infinite scroll
-  const allMoments = useMemo(() => [
-    {
-      id: '4',
-      book: 'Book 1',
-      chapter: 'Chapter 1',
-      moment: 'Moment 4',
-      content: 'The Millennium Falcon soared through hyperspace, carrying Luke, Han Solo, and Princess Leia to Alderaan. Luke couldn\'t shake the fe...'
-    },
-    {
-      id: '5',
-      book: 'Book 1',
-      chapter: 'Chapter 1',
-      moment: 'Moment 5',
-      content: 'Luke Skywalker, a young moisture farmer on Tatooine, felt a strange pull as he gazed at the twin suns setting on the horizon. It was a feeling he couldn\'t explain, a sense of destiny calling him to something greater than himself...'
-    },
-    {
-      id: '6',
-      book: 'Book 1',
-      chapter: 'Chapter 1',
-      moment: 'Moment 6',
-      content: 'Dagobah was a swampy, mist-shrouded planet, teeming with strange creatures and hidden dangers. Luke struggled to adapt to the h...'
-    },
-    {
-      id: '1',
-      book: 'Book 2',
-      chapter: 'Chapter 3',
-      moment: 'Moment 1',
-      content: 'Cloud City was a gleaming metropolis in the sky, a haven of luxury and sophistication. But beneath the surface, danger lurked. Lando...'
-    },
-    {
-      id: '2',
-      book: 'Book 2',
-      chapter: 'Chapter 3',
-      moment: 'Moment 2',
-      content: 'Jabba\'s palace was a den of villainy and excess, filled with bounty hunters, smugglers, and other unsavory characters. Luke knew he...'
-    },
-    {
-      id: '3',
-      book: 'Book 1',
-      chapter: 'Chapter 1',
-      moment: 'Moment 5',
-      content: 'The forest moon of Endor was a lush, green paradise, inhabited by the small but fierce Ewoks. Luke and his friends sought their help...'
-    },
-    {
-      id: '7',
-      book: 'Book 1',
-      chapter: 'Chapter 1',
-      moment: 'Moment 6',
-      content: 'The Emperor\'s throne room was a dark and foreboding place, filled with an aura of immense power. Luke faced his ultimate test, conf...'
-    },
-    {
-      id: '8',
-      book: 'Book 1',
-      chapter: 'Chapter 1',
-      moment: 'Moment 7',
-      content: 'The celebration on Endor was a joyous occasion, as the Rebel Alliance celebrated their victory over the Empire. But Luke couldn\'t sha...'
-    },
-    {
-      id: '9',
-      book: 'Book 2',
-      chapter: 'Chapter 4',
-      moment: 'Moment 8',
-      content: 'The Resistance base on D\'Qar was a hive of activity. Pilots prepared their X-wings for the next mission against the First Order...'
-    },
-    {
-      id: '10',
-      book: 'Book 1',
-      chapter: 'Chapter 2',
-      moment: 'Moment 9',
-      content: 'Ben Solo stood at a crossroads, torn between the light and dark sides of the Force. The pull of both was strong...'
-    },
-    {
-      id: '11',
-      book: 'Book 2',
-      chapter: 'Chapter 5',
-      moment: 'Moment 10',
-      content: 'Ahch-To was a remote planet, shrouded in mystery and ancient Jedi history. Rey climbed the stone steps, searching for Luke Skywalker...'
-    },
-    {
-      id: '12',
-      book: 'Book 1',
-      chapter: 'Chapter 3',
-      moment: 'Moment 11',
-      content: 'The Battle of Hoth raged on. Rebel soldiers fought valiantly against the Imperial AT-AT walkers advancing across the frozen plains...'
-    },
-    {
-      id: '13',
-      book: 'Book 2',
-      chapter: 'Chapter 6',
-      moment: 'Moment 12',
-      content: 'Crait\'s white salt plains turned red as the battle intensified. The Resistance made their last stand against overwhelming odds...'
-    },
-    {
-      id: '14',
-      book: 'Book 1',
-      chapter: 'Chapter 4',
-      moment: 'Moment 13',
-      content: 'The cantina on Mos Eisley was filled with the galaxy\'s most dangerous scum and villainy. Obi-Wan and Luke searched for a pilot...'
-    },
-    {
-      id: '15',
-      book: 'Book 2',
-      chapter: 'Chapter 7',
-      moment: 'Moment 14',
-      content: 'Exegol was hidden in the Unknown Regions, a dark world where the Sith Eternal prepared for their final assault on the galaxy...'
-    },
-    {
-      id: '16',
-      book: 'Book 1',
-      chapter: 'Chapter 5',
-      moment: 'Moment 15',
-      content: 'The second Death Star loomed in orbit above Endor. Inside, Luke faced the Emperor and Darth Vader in a final confrontation...'
-    },
-    {
-      id: '17',
-      book: 'Book 2',
-      chapter: 'Chapter 8',
-      moment: 'Moment 16',
-      content: 'Rey and Kylo Ren dueled in the wreckage of the Death Star II, waves crashing around them as they fought for the fate of the galaxy...'
-    },
-    {
-      id: '18',
-      book: 'Book 1',
-      chapter: 'Chapter 6',
-      moment: 'Moment 17',
-      content: 'Maz Kanata\'s castle held countless treasures and secrets from across the galaxy. It was here that Rey first heard the call of a lightsaber...'
-    },
-    {
-      id: '19',
-      book: 'Book 2',
-      chapter: 'Chapter 9',
-      moment: 'Moment 18',
-      content: 'The Battle of Scarif marked the first major victory for the Rebellion, but it came at a terrible cost. Rogue One had sacrificed everything...'
-    },
-    {
-      id: '20',
-      book: 'Book 1',
-      chapter: 'Chapter 7',
-      moment: 'Moment 19',
-      content: 'Mandalore was a world of warriors, where honor and combat prowess were valued above all else. Bo-Katan led her people with strength...'
-    },
-    {
-      id: '21',
-      book: 'Book 2',
-      chapter: 'Chapter 10',
-      moment: 'Moment 20',
-      content: 'The Razor Crest soared through hyperspace, the Mandalorian and Grogu on another adventure across the Outer Rim territories...'
-    }
-  ], []);
+  // Fetch moments from API with pagination
+  const { moments, loading, error, hasMore, loadMore, refresh } = useMomentList(10);
 
-  const [displayedMoments, setDisplayedMoments] = useState(allMoments.slice(0, 10));
-  const [loading, setLoading] = useState(false);
+  // Load initial moments on mount
+  useEffect(() => {
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Infinite scroll observer
   useEffect(() => {
-    const loadMoreMoments = () => {
-      const currentLength = displayedMoments.length;
-      const hasMoreToLoad = currentLength < allMoments.length;
-
-      if (hasMoreToLoad && !loading) {
-        setLoading(true);
-
-        // Simulate loading delay for smooth animation
-        setTimeout(() => {
-          const nextMoments = allMoments.slice(currentLength, currentLength + 5);
-          setDisplayedMoments([...displayedMoments, ...nextMoments]);
-          setLoading(false);
-        }, 300);
-      }
-    };
-
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          loadMoreMoments();
+        if (entries[0].isIntersecting && !loading && hasMore) {
+          loadMore();
         }
       },
       { threshold: 0.1 }
@@ -200,7 +40,7 @@ export default function TimelinePage() {
     }
 
     return () => observer.disconnect();
-  }, [displayedMoments, loading, allMoments]);
+  }, [loading, hasMore, loadMore]);
 
   // Mock books data
   const booksData = [
@@ -324,23 +164,66 @@ export default function TimelinePage() {
                 style={{ scrollBehavior: 'smooth' }}
               >
                 <div className="space-y-0">
-                  {displayedMoments.map((moment) => (
+                  {/* Error message */}
+                  {error && (
+                    <div className="py-4 text-center pl-8">
+                      <p className="text-sm text-red-400">{error}</p>
+                      <button
+                        onClick={refresh}
+                        className="mt-2 px-4 py-2 bg-accent text-white-text rounded-lg text-sm hover:brightness-110 transition-all"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Initial loading state */}
+                  {loading && moments.length === 0 && (
+                    <div className="py-12 text-center pl-8">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+                        <p className="text-light-text">Loading your moments...</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty state */}
+                  {!loading && !error && moments.length === 0 && (
+                    <div className="py-12 text-center pl-8">
+                      <div className="mb-4">
+                        <svg className="w-16 h-16 mx-auto text-light-text/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <h3 className="text-lg font-semibold text-white-text mb-2">No Moments Yet</h3>
+                        <p className="text-light-text mb-6 max-w-sm mx-auto">Start writing your first moment to begin building your story universe!</p>
+                      </div>
+                      <Link
+                        href="/write"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white-text rounded-lg text-sm font-medium hover:brightness-110 transition-all"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Start Writing Your First Moment
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* Moments list */}
+                  {moments.map((moment) => (
                     <div
                       key={moment.id}
                       onClick={() => setExpandedId(expandedId === moment.id ? null : moment.id)}
                     >
                       <MomentCard
-                        book={moment.book}
-                        chapter={moment.chapter}
-                        moment={moment.moment}
-                        content={moment.content}
+                        id={moment.id}
+                        title={moment.title}
+                        content={moment.preview}
                         isExpanded={expandedId === moment.id}
                       />
                     </div>
                   ))}
 
-                  {/* Loading indicator / Intersection observer target */}
-                  {displayedMoments.length < allMoments.length && (
+                  {/* Loading indicator / Intersection observer target - only show if we have moments */}
+                  {moments.length > 0 && hasMore && (
                     <div ref={observerTarget} className="py-4 text-center pl-8">
                       {loading && (
                         <div className="flex items-center justify-center gap-2 text-light-text text-sm">
@@ -348,6 +231,13 @@ export default function TimelinePage() {
                           Loading more moments...
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* End of list message */}
+                  {!loading && !hasMore && moments.length > 0 && (
+                    <div className="py-4 text-center pl-8">
+                      <p className="text-sm text-light-text">You&apos;ve reached the end of your timeline</p>
                     </div>
                   )}
                 </div>

@@ -117,6 +117,16 @@ Completed and in-progress feature implementation documentation.
   - Dark theme integration with Lexend font
   - Status: ✅ Completed
 
+- **[Moments API Implementation](./tasks/moments_api_implementation.md)**
+  - RESTful API routes for Moment CRUD operations
+  - User isolation and authentication at every level
+  - Frontend integration with Write page
+  - Custom React hook (useMoment) for API calls
+  - Toast notifications for user feedback
+  - Performance optimized (lightweight vs full data)
+  - Template for future node type implementations
+  - Status: ✅ Completed
+
 **What belongs here:**
 - Feature implementation documentation with completion status
 - Implementation plans with technical specifications
@@ -266,22 +276,25 @@ npm run test:coverage  # Run tests with coverage report
 - Slash commands for quick formatting
 - Entity mentions with @ autocomplete
 - Real-time character and word counting
+- **Moments API with full CRUD operations**
+- **Frontend-to-backend integration for moment saving**
+- **User-isolated data storage in Neo4j**
 
 ### 🚧 In Progress
 - Database schema design for lore entities
-- Planning API architecture
 - Entity label assignment (UI complete, backend pending)
+- Character, Location, Item, Organization API routes (using Moments as template)
 
 ### 📋 Planned
 - Universe, Book, and Chapter models
 - Entity models with relationships (Character, Location, Item, Organization)
-- Moment and timeline functionality
-- Entity relationships system
+- Timeline functionality and visualization
+- Entity relationships system (connect moments to characters/locations)
 - Custom fields for entities
 - Advanced search with filters
 - Graph view for entity relationships
 - Real-time collaboration features
-- Rich text editor integration
+- Moment listing and browsing UI
 
 ## Key Technologies
 
@@ -382,6 +395,7 @@ When contributing to this project:
 - **Neo4j questions**: Check [Neo4j Query Patterns](./prds/neo4j_query_patterns.md)
 - **Docker questions**: Check [Docker Setup](./prds/docker_setup.md)
 - **Route protection questions**: Check [Route Protection Patterns](./prds/route_protection_patterns.md)
+- **API implementation**: Check [Moments API Implementation](./tasks/moments_api_implementation.md) for template
 - **Feature implementation**: Check tasks/ folder for completed implementations
 
 ## Contact & Support
@@ -391,5 +405,5 @@ For questions or issues not covered in the documentation, please contact the dev
 ---
 
 **Last Updated:** 2025-10-11
-**Documentation Version:** 1.2.0
-**Changes:** Updated folder structure (System→docs, Tasks→tasks, SOP→prds), Added Docker development instructions
+**Documentation Version:** 1.3.0
+**Changes:** Added Moments API Implementation documentation, updated project status with completed API integration
