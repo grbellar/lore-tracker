@@ -5,18 +5,19 @@ This directory contains comprehensive documentation for the Lore Tracker project
 ## Quick Start
 
 **New to the project?** Start here:
-1. Read [Project Architecture](./System/project_architecture.md) for a complete overview
-2. Review [Database Schema](./System/database_schema.md) to understand data models
-3. Check [Authentication System](./System/authentication_system.md) to understand auth flow
-4. Explore [Text Editor System](./System/text_editor_system.md) to learn about the writing interface
+1. Read [Project Architecture](./docs/project_architecture.md) for a complete overview
+2. Review [PostgreSQL User Schema](./docs/postgres_user_schema.md) and [Backend Overview](./prds/backend_overview.md) to understand data models
+3. Check [Authentication System](./docs/authentication_system.md) to understand auth flow
+4. Explore [Text Editor System](./docs/text_editor_system.md) to learn about the writing interface
+5. Review [Testing Guide](./docs/testing_guide.md) to understand test coverage and run tests
 
 ## Documentation Structure
 
-### 📁 System Documentation
+### 📁 docs/ - System Documentation
 
 Core system architecture, technical stack, and infrastructure documentation.
 
-- **[Project Architecture](./System/project_architecture.md)**
+- **[Project Architecture](./docs/project_architecture.md)**
   - Complete project overview and goals
   - Tech stack details (Next.js 15, React 19, TypeScript, Tailwind CSS v4)
   - Project structure and file organization
@@ -28,7 +29,7 @@ Core system architecture, technical stack, and infrastructure documentation.
   - Development workflow and commands
   - Current implementation status and roadmap
 
-- **[Database Schema](./System/database_schema.md)**
+- **[PostgreSQL User Schema](./docs/postgres_user_schema.md)**
   - Database configuration (PostgreSQL + Prisma)
   - Current schema (authentication models: User, Account, Session, VerificationToken)
   - Planned schema (Universe, Book, Chapter, Entity types, Moment, Relationship)
@@ -38,7 +39,7 @@ Core system architecture, technical stack, and infrastructure documentation.
   - Performance considerations (connection pooling, indexes)
   - Future schema considerations (multi-tenancy, soft deletes, versioning)
 
-- **[Authentication System](./System/authentication_system.md)**
+- **[Authentication System](./docs/authentication_system.md)**
   - NextAuth.js v4 architecture
   - Authentication flow (sign up, sign in, session management)
   - Component breakdown:
@@ -55,7 +56,7 @@ Core system architecture, technical stack, and infrastructure documentation.
   - Future enhancements (email verification, OAuth, 2FA)
   - Troubleshooting guide
 
-- **[Text Editor System](./System/text_editor_system.md)**
+- **[Text Editor System](./docs/text_editor_system.md)**
   - Notion-style WYSIWYG editor built with Tiptap 3.6.5
   - Component architecture (Editor, SlashMenu, MentionExtension, MentionList)
   - Slash commands for quick formatting (/, headings, lists, quotes, code blocks)
@@ -71,12 +72,23 @@ Core system architecture, technical stack, and infrastructure documentation.
   - Keyboard shortcuts and navigation
   - Troubleshooting guide and testing checklist
 
-### 📁 Tasks Documentation
+- **[Testing Guide](./docs/testing_guide.md)**
+  - Comprehensive authentication testing with Jest
+  - 113 passing tests covering critical functionality
+  - Unit tests for password hashing, verification, and Neo4j auth
+  - **CRITICAL**: User isolation tests for Neo4j (no cross-user data pollution)
+  - Integration tests for error handling and logging
+  - Test utilities and mocking strategies
+  - Test coverage metrics and CI/CD recommendations
+  - Security testing highlights (timing attacks, parameter injection)
+  - Known limitations and future improvements
 
-Product requirements documents (PRDs) and implementation plans for features.
+### 📁 tasks/ - Implementation Tasks
+
+Completed and in-progress feature implementation documentation.
 
 **Available Tasks:**
-- **[Authentication Setup & Verification](./Tasks/authentication_setup_verification.md)**
+- **[Authentication Setup & Verification](./tasks/authentication_setup_verification.md)**
   - Complete authentication system setup and verification
   - NextAuth.js v4 with Credentials Provider
   - Prisma schema with User, Account, Session, VerificationToken
@@ -85,7 +97,7 @@ Product requirements documents (PRDs) and implementation plans for features.
   - Route protection middleware
   - Status: ✅ Completed
 
-- **[Entity View Page Implementation](./Tasks/entity_view_page.md)**
+- **[Entity View Page Implementation](./tasks/entity_view_page.md)**
   - Unified entity listing page for all entity types
   - Grid/list view toggle with responsive layouts
   - Filter by entity type via URL parameters
@@ -95,7 +107,7 @@ Product requirements documents (PRDs) and implementation plans for features.
   - Navigation flow with back button support
   - Status: ✅ Completed
 
-- **[Notion-Style Text Editor](./Tasks/notion_style_editor.md)**
+- **[Notion-Style Text Editor](./tasks/notion_style_editor.md)**
   - Interactive Notion-style WYSIWYG text editor
   - Tiptap integration with StarterKit extensions
   - Slash commands for formatting (headings, lists, quotes, code)
@@ -106,17 +118,41 @@ Product requirements documents (PRDs) and implementation plans for features.
   - Status: ✅ Completed
 
 **What belongs here:**
-- Feature PRDs with requirements and user stories
+- Feature implementation documentation with completion status
 - Implementation plans with technical specifications
 - Task breakdowns and development roadmaps
-- Feature-specific documentation
+- Feature-specific notes and learnings
 
-### 📁 SOP Documentation
+### 📁 prds/ - Product Requirements & Technical Specs
 
-Standard Operating Procedures and best practices for common development tasks.
+Product requirements documents, technical specifications, and best practices.
 
-**Available SOPs:**
-- **[Route Protection Patterns](./SOP/route_protection_patterns.md)**
+**Available PRDs:**
+- **[Backend Overview](./prds/backend_overview.md)**
+  - Two-database system architecture (PostgreSQL + Neo4j)
+  - PostgreSQL schema for users, authentication, subscriptions
+  - Neo4j schema for story data (characters, locations, events, relationships)
+  - User data isolation patterns and security rules
+  - API implementation examples and query patterns
+  - Performance optimization strategies
+  - Environment variables and Docker setup
+  - Migration scripts and testing checklist
+
+- **[Docker Setup](./prds/docker_setup.md)**
+  - Docker containerization setup and configuration
+  - Development and production container strategies
+  - Service orchestration with Docker Compose
+  - Volume management and persistence
+  - Environment configuration
+
+- **[Neo4j Query Patterns](./prds/neo4j_query_patterns.md)**
+  - Common Neo4j query patterns and best practices
+  - User isolation query patterns
+  - Relationship traversal strategies
+  - Performance optimization techniques
+  - Index usage and query optimization
+
+- **[Route Protection Patterns](./prds/route_protection_patterns.md)**
   - How to protect routes with middleware
   - Server component authentication
   - Client component authentication with useSession
@@ -125,22 +161,52 @@ Standard Operating Procedures and best practices for common development tasks.
   - Common patterns and troubleshooting
 
 **What belongs here:**
-- How to add a new database model and migration
-- How to create a new page route
-- How to add a new API endpoint
-- How to create a new reusable component
-- How to update the design system
-- Deployment procedures
-- Testing procedures
+- Product requirements documents with feature specifications
+- Technical architecture specifications
+- Best practices and standard operating procedures
+- Development patterns and guidelines
 
 ## Getting Started with Development
 
 ### Prerequisites
-- Node.js (latest LTS version)
-- PostgreSQL database
-- npm or yarn
+- Docker and Docker Compose
+- Node.js (latest LTS version) - for local development without Docker
 
-### Setup
+### Docker Setup (Recommended)
+
+The project uses Docker for local development with PostgreSQL and Neo4j databases.
+
+```bash
+# Start all services (web app, PostgreSQL, Neo4j)
+docker-compose up
+
+# Start services in detached mode (background)
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker logs loretracker-web-dev -f        # Web app logs
+docker logs loretracker-postgres-dev -f   # PostgreSQL logs
+docker logs loretracker-neo4j-dev -f      # Neo4j logs
+
+# Restart a specific service
+docker-compose restart web
+
+# Rebuild after dependency changes
+docker-compose up --build
+```
+
+**Access Points:**
+- **Web App**: http://localhost:3000
+- **Neo4j Browser**: http://localhost:7474 (username: `neo4j`, password: `testpassword`)
+- **PostgreSQL**: localhost:5432 (accessible via any PostgreSQL client)
+
+### Local Setup (Without Docker)
+
+If you prefer to run without Docker:
+
 ```bash
 # Install dependencies
 npm install
@@ -157,17 +223,34 @@ npm run dev
 ```
 
 ### Development Commands
+
+**Docker Commands:**
 ```bash
-npm run dev      # Start development server with Turbopack
-npm run build    # Build for production with Turbopack
-npm start        # Start production server
-npm run lint     # Run ESLint
+docker-compose up              # Start all services
+docker-compose down            # Stop all services
+docker-compose restart web     # Restart web app
+docker-compose logs -f web     # Follow web app logs
+docker-compose exec web npm run lint  # Run linter in container
+docker-compose exec web npm test      # Run tests in container
+```
+
+**NPM Commands (Local or Inside Container):**
+```bash
+npm run dev            # Start development server with Turbopack
+npm run build          # Build for production with Turbopack
+npm start              # Start production server
+npm run lint           # Run ESLint
+npm test               # Run test suite
+npm run test:watch     # Run tests in watch mode
+npm run test:coverage  # Run tests with coverage report
 ```
 
 ## Project Status
 
 ### ✅ Completed
 - Authentication system (sign up, sign in, JWT sessions)
+- **Authentication test suite (113 passing tests)**
+- **User isolation testing for Neo4j**
 - Full UI/UX design for all main pages
 - Component architecture established
 - Design system with Tailwind CSS v4
@@ -211,8 +294,10 @@ npm run lint     # Run ESLint
 | NextAuth.js | 4.24.11 | Authentication |
 | Prisma | 6.16.3 | ORM |
 | PostgreSQL | Latest | Database |
+| Neo4j | 5+ | Graph database |
 | Tiptap | 3.6.5 | Rich text editor |
 | bcryptjs | 3.0.2 | Password hashing |
+| Jest | 30.2.0 | Testing framework |
 | Lucide React | 0.545.0 | Icons |
 | tippy.js | 6.3.7 | Tooltip/popover positioning |
 
@@ -255,19 +340,19 @@ npm run lint     # Run ESLint
 ### When to Update Documentation
 
 **After implementing a feature:**
-1. Update relevant System docs if architecture changed
-2. Create or update Task doc with implementation details
-3. Add or update SOP if new patterns were established
+1. Update relevant docs/ files if architecture changed
+2. Create or update tasks/ doc with implementation details
+3. Add or update prds/ if new patterns were established
 4. Update this README if new docs were added
 
 **When fixing a bug:**
-1. Update SOP if the bug revealed a process issue
-2. Update System docs if a misconception was documented
+1. Update prds/ if the bug revealed a process issue
+2. Update docs/ files if a misconception was documented
 
 **When adding new patterns:**
-1. Document the pattern in SOP
+1. Document the pattern in prds/
 2. Provide examples and rationale
-3. Link from relevant System docs
+3. Link from relevant docs/ files
 
 ### Documentation Best Practices
 
@@ -282,19 +367,22 @@ npm run lint     # Run ESLint
 
 When contributing to this project:
 
-1. **Read the docs**: Start with [Project Architecture](./System/project_architecture.md)
+1. **Read the docs**: Start with [Project Architecture](./docs/project_architecture.md)
 2. **Follow patterns**: Check existing code for established patterns
 3. **Update docs**: Keep documentation in sync with code changes
 4. **Ask questions**: If something is unclear, ask before implementing
 
 ## Getting Help
 
-- **Architecture questions**: Check [Project Architecture](./System/project_architecture.md)
-- **Database questions**: Check [Database Schema](./System/database_schema.md)
-- **Auth questions**: Check [Authentication System](./System/authentication_system.md)
-- **Editor questions**: Check [Text Editor System](./System/text_editor_system.md)
-- **Process questions**: Check SOP docs (when available)
-- **Feature questions**: Check Tasks docs (when available)
+- **Architecture questions**: Check [Project Architecture](./docs/project_architecture.md)
+- **Database questions**: Check [PostgreSQL User Schema](./docs/postgres_user_schema.md) and [Backend Overview](./prds/backend_overview.md)
+- **Auth questions**: Check [Authentication System](./docs/authentication_system.md)
+- **Testing questions**: Check [Testing Guide](./docs/testing_guide.md)
+- **Editor questions**: Check [Text Editor System](./docs/text_editor_system.md)
+- **Neo4j questions**: Check [Neo4j Query Patterns](./prds/neo4j_query_patterns.md)
+- **Docker questions**: Check [Docker Setup](./prds/docker_setup.md)
+- **Route protection questions**: Check [Route Protection Patterns](./prds/route_protection_patterns.md)
+- **Feature implementation**: Check tasks/ folder for completed implementations
 
 ## Contact & Support
 
@@ -302,5 +390,6 @@ For questions or issues not covered in the documentation, please contact the dev
 
 ---
 
-**Last Updated:** 2025-10-07
-**Documentation Version:** 1.0.0
+**Last Updated:** 2025-10-11
+**Documentation Version:** 1.2.0
+**Changes:** Updated folder structure (System→docs, Tasks→tasks, SOP→prds), Added Docker development instructions

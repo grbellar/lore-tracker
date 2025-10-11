@@ -8,17 +8,23 @@ We keep all important docs in `.agent` folder and keep updating them, structure 
 ```
 .agent/
 ├── README.md                           # Index of all documentation
-├── Tasks/                              # PRD & implementation plans for each feature
+├── tasks/                              # Completed feature implementations & task docs
+│   ├── authentication_setup_verification.md
+│   ├── entity_view_page.md
+│   ├── notion_style_editor.md
 │   └── ...
-├── System/                            # Current state of the system. Examples include:
+├── docs/                               # Core system documentation
 │   ├── project_architecture.md        # Project structure, tech stack, integration points
-│   ├── database_schema.md            # Database schema & relationships
-│   ├── authentication_system.md      # Auth flow & security
+│   ├── postgres_user_schema.md        # PostgreSQL schema for users & auth
+│   ├── authentication_system.md       # Auth flow & security
+│   ├── text_editor_system.md          # Tiptap editor documentation
+│   ├── testing_guide.md               # Test suite & coverage
 │   └── ...
-└── SOP/                              # Best practices & procedures. Examples include:
-    ├── schema_migration.md           # How to add schema migrations
-    ├── new_page_route.md            # How to add new page routes
-    ├── component_creation.md        # How to create new components
+└── prds/                               # Product requirements & technical specs
+    ├── backend_overview.md            # Two-database architecture (PostgreSQL + Neo4j)
+    ├── docker_setup.md                # Docker & containerization
+    ├── neo4j_query_patterns.md        # Neo4j best practices
+    ├── route_protection_patterns.md   # Auth middleware patterns
     └── ...
 ```
 
@@ -26,21 +32,57 @@ We should always update .agent docs after we implement new features or make chan
 
 BEFORE YOU PLAN ANY IMPLEMENTATION, always read the .agent/README first to get context
 
-## Development Commands
-THE SERVER IS USUALLY ALREADY RUNNING AND YOU DON'T NEED TO START IT TO TEST.
+## Development Environment
+
+**IMPORTANT:** The project runs in Docker containers. THE SERVER IS USUALLY ALREADY RUNNING AND YOU DON'T NEED TO START IT TO TEST.
+
+### Docker Commands
 
 ```bash
-# Start development server with Turbopack BUT FIRST check to see if the server is already running. It most likely is. Only start the server if needed.
-npm run dev
+# Check if services are running
+docker ps
 
-# Build for production with Turbopack
-npm run build
+# Start all services (web app, PostgreSQL, Neo4j)
+docker-compose up
 
-# Start production server
-npm start
+# Start services in background
+docker-compose up -d
 
-# Run linter
-npm run lint
+# Stop all services
+docker-compose down
+
+# View logs
+docker logs loretracker-web-dev -f        # Web app logs
+docker logs loretracker-postgres-dev -f   # PostgreSQL logs
+docker logs loretracker-neo4j-dev -f      # Neo4j logs
+
+# Restart web app only
+docker-compose restart web
+
+# Rebuild after dependency changes
+docker-compose up --build
+
+# Run commands inside container
+docker-compose exec web npm run lint      # Run linter
+docker-compose exec web npm test          # Run tests
+docker-compose exec web npm run build     # Build for production
 ```
 
-Development server runs at http://localhost:3000
+### Access Points
+- **Web App**: http://localhost:3000
+- **Neo4j Browser**: http://localhost:7474 (username: `neo4j`, password: `testpassword`)
+- **PostgreSQL**: localhost:5432
+
+### Local Development (Without Docker)
+
+If running locally without Docker:
+
+```bash
+npm run dev            # Start development server with Turbopack
+npm run build          # Build for production with Turbopack
+npm start              # Start production server
+npm run lint           # Run ESLint
+npm test               # Run test suite
+npm run test:watch     # Run tests in watch mode
+npm run test:coverage  # Run tests with coverage report
+```
