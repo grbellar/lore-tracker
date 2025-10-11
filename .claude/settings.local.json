@@ -7,7 +7,12 @@
       "Bash(npx prisma:*)",
       "Bash(test:*)",
       "Bash(cat:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(docker-compose:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker system:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker exec:*)"
     ],
     "deny": [],
     "ask": []

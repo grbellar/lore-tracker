@@ -388,8 +388,13 @@ export async function GET(req: Request) {
 Required in `.env`:
 
 ```bash
-# Database connection
+# PostgreSQL Database connection
 DATABASE_URL="postgresql://user:password@host:port/database"
+
+# Neo4j Database connection
+NEO4J_URI="bolt://localhost:7687"
+NEO4J_USER="neo4j"
+NEO4J_PASSWORD="secret"
 
 # NextAuth configuration
 NEXTAUTH_SECRET="your-secret-key-here"  # Generate with: openssl rand -base64 32
@@ -400,6 +405,247 @@ NEXTAUTH_URL="http://localhost:3000"    # Production: https://yourdomain.com
 - `NEXTAUTH_SECRET`: Used to encrypt JWT tokens (must be kept secret)
 - Never commit `.env` to version control
 - Use different secrets for development and production
+
+## Neo4j Integration
+
+### Overview
+
+The application uses a dual-database architecture:
+- **PostgreSQL**: User accounts, authentication, subscriptions (via Prisma)
+- **Neo4j**: Story data with graph relationships (characters, locations, events, etc.)
+
+User data is isolated in Neo4j using the `user_id` property on all nodes and relationships.
+
+### Neo4j Connection
+
+**Location**: `lib/neo4j.ts`
+
+The Neo4j driver is implemented as a singleton with connection pooling:
+
+```typescript
+import { driver, getSession, verifyConnection } from '@/lib/neo4j'
+
+// Get a session for queries
+const session = getSession()
+
+// Verify connection is working
+const isConnected = await verifyConnection()
+```
+
+**Configuration:**
+- Connection pooling (max 50 connections)
+- 30-second connection acquisition timeout
+- Automatic retry logic for transient failures
+
+### User Isolation Utilities
+
+**Location**: `lib/neo4j-auth.ts`
+
+Helper functions for authenticated Neo4j queries with automatic user isolation:
+
+#### Extract User ID from Session
+```typescript
+import { getUserIdFromSession } from '@/lib/neo4j-auth'
+
+const session = await getServerSession()
+const userId = getUserIdFromSession(session) // throws if invalid
+```
+
+#### Execute Read Query with User Isolation
+```typescript
+import { executeUserQuery } from '@/lib/neo4j-auth'
+
+// Automatically injects userId into the query
+const characters = await executeUserQuery(
+  'MATCH (c:Character {user_id: $userId}) RETURN c',
+  {} // additional params
+)
+```
+
+#### Execute Write Transaction with User Isolation
+```typescript
+import { executeUserWrite } from '@/lib/neo4j-auth'
+
+const newCharacter = await executeUserWrite(
+  `CREATE (c:Character {
+    id: $id,
+    user_id: $userId,
+    name: $name,
+    created_at: datetime(),
+    updated_at: datetime()
+  }) RETURN c`,
+  {
+    id: crypto.randomUUID(),
+    name: 'Luke Skywalker'
+  }
+)
+```
+
+#### Verify Node Ownership
+```typescript
+import { verifyNodeOwnership } from '@/lib/neo4j-auth'
+
+const canEdit = await verifyNodeOwnership('Character', characterId)
+if (!canEdit) {
+  throw new Error('Unauthorized')
+}
+```
+
+#### Delete All User Data
+```typescript
+import { deleteAllUserData } from '@/lib/neo4j-auth'
+
+// Use when deleting a user account
+const deletedCount = await deleteAllUserData(userId)
+```
+
+### API Route Pattern for Neo4j
+
+All Neo4j operations must be performed through authenticated API routes:
+
+```typescript
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { executeUserQuery, executeUserWrite } from '@/lib/neo4j-auth'
+
+export async function GET(req: Request) {
+  // 1. Verify authentication
+  const session = await getServerSession()
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
+  try {
+    // 2. Query with automatic user isolation
+    const results = await executeUserQuery(
+      'MATCH (c:Character {user_id: $userId}) RETURN c',
+      {},
+      session
+    )
+
+    return NextResponse.json({ data: results })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Query failed' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(req: Request) {
+  const session = await getServerSession()
+  if (!session) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
+  const body = await req.json()
+
+  try {
+    const result = await executeUserWrite(
+      `CREATE (c:Character {
+        id: $id,
+        user_id: $userId,
+        name: $name,
+        created_at: datetime(),
+        updated_at: datetime()
+      }) RETURN c`,
+      {
+        id: crypto.randomUUID(),
+        name: body.name,
+      },
+      session
+    )
+
+    return NextResponse.json(
+      { data: result[0] },
+      { status: 201 }
+    )
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Creation failed' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+### Testing Neo4j Integration
+
+**Test Endpoint**: `GET /api/neo4j/test`
+
+This endpoint verifies:
+- Neo4j connection is working
+- User authentication is functioning
+- User isolation is enforced
+- Create/read operations work correctly
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "message": "Neo4j integration test passed",
+  "data": {
+    "user": {
+      "id": "clxxx...",
+      "email": "user@example.com",
+      "name": "John Doe"
+    },
+    "neo4j_connection": "success",
+    "test_node_created": {
+      "id": "uuid...",
+      "name": "Test Node for user@example.com"
+    },
+    "user_nodes_count": 1,
+    "test_completed_at": "2025-10-11T..."
+  }
+}
+```
+
+### Neo4j Security Best Practices
+
+1. **Always Include user_id**: Every Neo4j query MUST filter by `user_id`
+2. **Use Helper Functions**: Always use `executeUserQuery` and `executeUserWrite`
+3. **Verify Ownership**: Check ownership before updates/deletes with `verifyNodeOwnership`
+4. **Server-Side Only**: Never expose Neo4j operations to client components
+5. **Session Validation**: Always verify session before Neo4j operations
+6. **Error Handling**: Catch and handle Neo4j-specific errors appropriately
+
+### Data Isolation Architecture
+
+Per the [Database Specification](./../SOP/database_spec.md):
+
+- Every Neo4j node has a `user_id` property
+- Every relationship has a `user_id` property
+- Node labels define types (`:Character`, `:Location`, etc.)
+- Indexes on `user_id` for performance
+- Unique constraints on node IDs within labels
+
+**Example User-Isolated Node:**
+```cypher
+CREATE (c:Character {
+  id: "uuid-123",
+  user_id: "user-abc",  // REQUIRED for isolation
+  name: "Luke Skywalker",
+  created_at: datetime()
+})
+```
+
+**Example User-Isolated Relationship:**
+```cypher
+MATCH (c1:Character {id: $char1Id, user_id: $userId})
+MATCH (c2:Character {id: $char2Id, user_id: $userId})
+CREATE (c1)-[:KNOWS {
+  user_id: $userId,  // REQUIRED for isolation
+  relationship_type: "friend",
+  since: date("2024-01-01")
+}]->(c2)
+```
 
 ## Future Enhancements
 

@@ -1,0 +1,31 @@
+# Development Dockerfile for hot reload support
+
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Install dependencies for Prisma
+RUN apk add --no-cache libc6-compat openssl bash curl
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy Prisma schema
+COPY prisma ./prisma/
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Copy the rest of the application
+COPY . .
+
+# Expose ports
+EXPOSE 3000 9229
+
+# Set environment
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Default command (can be overridden in docker-compose)
+CMD ["npm", "run", "dev"]

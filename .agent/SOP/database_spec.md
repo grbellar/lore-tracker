@@ -90,9 +90,10 @@ CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 | id | String (UUID) | Yes | Unique identifier |
 | user_id | String (UUID) | Yes | User who owns this |
 | title | String | Yes | Event title |
-| description | String | No | Event details |
+| content | String | No | Full text from the moment |
+| summary | String | No | Moment summary |
+| preview | String | No | Moment preview. First 300 characters of text for moment timeline |
 | timestamp | DateTime | No | In-world time |
-| order_index | Integer | Yes | Backup ordering |
 | created_at | DateTime | Yes | Creation timestamp |
 | updated_at | DateTime | Yes | Last modified |
 
@@ -172,7 +173,6 @@ CREATE INDEX user_isolation IF NOT EXISTS FOR (n) ON (n.user_id);
 // Label-specific indexes
 CREATE INDEX character_user IF NOT EXISTS FOR (c:Character) ON (c.user_id);
 CREATE INDEX location_user IF NOT EXISTS FOR (l:Location) ON (l.user_id);
-CREATE INDEX moment_user_order IF NOT EXISTS FOR (m:Moment) ON (m.user_id, m.order_index);
 CREATE INDEX item_user IF NOT EXISTS FOR (i:Item) ON (i.user_id);
 CREATE INDEX organization_user IF NOT EXISTS FOR (o:Organization) ON (o.user_id);
 
@@ -246,13 +246,57 @@ RETURN c,
   collect(DISTINCT other) as relationships
 ```
 
-#### Get Timeline
+#### Get Timeline (Lightweight - Preview Only)
 ```cypher
+// Returns only preview data for timeline display (excludes large content field)
 MATCH (start:Moment {user_id: $userId})
 WHERE NOT (:Moment)-[:AFTER]->(start)
 MATCH path = (start)-[:AFTER*0..]->(m:Moment)
-RETURN m
+RETURN m.id as id,
+       m.title as title,
+       m.preview as preview,
+       m.summary as summary,
+       m.timestamp as timestamp,
+       m.created_at as created_at,
+       m.updated_at as updated_at
 ORDER BY length(path)
+```
+
+#### Get Single Moment (Full Content)
+```cypher
+// Fetch full moment details including content when user clicks into a moment
+MATCH (m:Moment {id: $momentId, user_id: $userId})
+RETURN m
+```
+
+#### Get Moments List (Card View)
+```cypher
+// Get all moments in card/list view without full content
+MATCH (m:Moment {user_id: $userId})
+RETURN m.id as id,
+       m.title as title,
+       m.preview as preview,
+       m.summary as summary,
+       m.timestamp as timestamp,
+       m.created_at as created_at
+ORDER BY m.created_at DESC
+LIMIT $limit
+SKIP $offset
+```
+
+#### Get Moments with Related Entities (Lightweight)
+```cypher
+// Get moments with related characters/locations but exclude content
+MATCH (m:Moment {user_id: $userId})
+OPTIONAL MATCH (m)<-[:PARTICIPATED_IN]-(c:Character)
+OPTIONAL MATCH (m)-[:OCCURRED_AT]->(l:Location)
+RETURN m.id as id,
+       m.title as title,
+       m.preview as preview,
+       m.timestamp as timestamp,
+       collect(DISTINCT {id: c.id, name: c.name}) as characters,
+       collect(DISTINCT {id: l.id, name: l.name}) as locations
+ORDER BY m.timestamp DESC
 ```
 
 #### Reorder Moments
@@ -306,6 +350,101 @@ async function getUserCharacters(userId) {
     { userId }
   );
   return result.records.map(r => r.get('c').properties);
+}
+
+// Lightweight timeline - excludes content field for performance
+async function getTimelinePreview(userId) {
+  const result = await neo4j.run(
+    `MATCH (start:Moment {user_id: $userId})
+     WHERE NOT (:Moment)-[:AFTER]->(start)
+     MATCH path = (start)-[:AFTER*0..]->(m:Moment)
+     RETURN m.id as id,
+            m.title as title,
+            m.preview as preview,
+            m.summary as summary,
+            m.timestamp as timestamp,
+            m.created_at as created_at,
+            m.updated_at as updated_at
+     ORDER BY length(path)`,
+    { userId }
+  );
+
+  return result.records.map(r => ({
+    id: r.get('id'),
+    title: r.get('title'),
+    preview: r.get('preview'),
+    summary: r.get('summary'),
+    timestamp: r.get('timestamp'),
+    created_at: r.get('created_at'),
+    updated_at: r.get('updated_at')
+  }));
+}
+
+// Full moment with content - only when user views details
+async function getMomentDetails(userId, momentId) {
+  const result = await neo4j.run(
+    `MATCH (m:Moment {id: $momentId, user_id: $userId})
+     RETURN m`,
+    { userId, momentId }
+  );
+
+  if (!result.records.length) {
+    throw new Error('Moment not found or unauthorized');
+  }
+
+  return result.records[0].get('m').properties;
+}
+
+// Paginated moments list for browsing
+async function getMomentsList(userId, { limit = 20, offset = 0 }) {
+  const result = await neo4j.run(
+    `MATCH (m:Moment {user_id: $userId})
+     RETURN m.id as id,
+            m.title as title,
+            m.preview as preview,
+            m.summary as summary,
+            m.timestamp as timestamp,
+            m.created_at as created_at
+     ORDER BY m.created_at DESC
+     SKIP $offset
+     LIMIT $limit`,
+    { userId, limit, offset }
+  );
+
+  return result.records.map(r => ({
+    id: r.get('id'),
+    title: r.get('title'),
+    preview: r.get('preview'),
+    summary: r.get('summary'),
+    timestamp: r.get('timestamp'),
+    created_at: r.get('created_at')
+  }));
+}
+
+// Moments with related entities (characters/locations) - lightweight
+async function getMomentsWithRelations(userId) {
+  const result = await neo4j.run(
+    `MATCH (m:Moment {user_id: $userId})
+     OPTIONAL MATCH (m)<-[:PARTICIPATED_IN]-(c:Character)
+     OPTIONAL MATCH (m)-[:OCCURRED_AT]->(l:Location)
+     RETURN m.id as id,
+            m.title as title,
+            m.preview as preview,
+            m.timestamp as timestamp,
+            collect(DISTINCT {id: c.id, name: c.name}) as characters,
+            collect(DISTINCT {id: l.id, name: l.name}) as locations
+     ORDER BY m.timestamp DESC`,
+    { userId }
+  );
+
+  return result.records.map(r => ({
+    id: r.get('id'),
+    title: r.get('title'),
+    preview: r.get('preview'),
+    timestamp: r.get('timestamp'),
+    characters: r.get('characters').filter(c => c.id !== null),
+    locations: r.get('locations').filter(l => l.id !== null)
+  }));
 }
 ```
 
@@ -424,10 +563,9 @@ volumes:
 
 ## Migration Scripts
 
-### Rebuild Moment Timeline from order_index
+### Rebuild Moment Timeline
 ```cypher
 MATCH (m:Moment {user_id: $userId})
-ORDER BY m.order_index
 WITH collect(m) as moments
 FOREACH (i IN range(0, size(moments)-2) |
   FOREACH (m1 IN [moments[i]] |
@@ -447,7 +585,9 @@ FOREACH (i IN range(0, size(moments)-2) |
 3. Batch operations with UNWIND for bulk inserts
 4. Limit relationship traversal depth (max 3-4 levels)
 5. Use connection pooling for both databases
-7. Consider read replicas at scale
+6. **Exclude large text fields from list/timeline queries** - Only fetch `content` when viewing moment details
+7. Use pagination (LIMIT/SKIP) for large result sets
+8. Consider read replicas at scale
 
 ---
 
